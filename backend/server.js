@@ -1,25 +1,14 @@
+require("dotenv").config();
 const express = require("express");
-
+const productRoutes = require("./src/routes/productRoutes");
 const app = express();
 
+app.use(express.json());
 app.get("/", (req, res) => {
     res.send("Backend Berjalan");
 });
 
-app.get("/api/products", (req, res) => {
-    res.json([
-        {
-            id: 1,
-            name: "Burger",
-            price: 25000,
-        },
-        {
-            id: 2,
-            name: "Pizza",
-            price: 35000,
-        },
-    ]);
-});
+app.use("/api/products", productRoutes);
 
 app.listen(5000, () => {
     console.log("Server berjalan di port 5000");
