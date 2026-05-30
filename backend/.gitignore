@@ -6,3 +6,6 @@ node_modules/
 
 # Prisma generated client
 /src/generated/prisma
+
+uploads/
+food_ordering_backup.sql
