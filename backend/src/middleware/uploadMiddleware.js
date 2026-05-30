@@ -8,8 +8,8 @@ const storage = multer.diskStorage({
     },
 });
 
-const uploads = multer({
+const upload = multer({
     storage,
-})
-const upload = require("../middleware/uploadMIddleware");
-module.export = upload;
+});
+
+module.exports = upload;

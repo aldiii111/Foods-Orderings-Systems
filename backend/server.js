@@ -1,11 +1,13 @@
 require("dotenv").config();
 
 const express = require("express");
+const cors = require("cors");
 const productRoutes = require("./src/routes/productRoutes");
 const authRoutes = require("./src/routes/authRoutes");
 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 
 app.get("/", (req, res) => {
@@ -16,7 +18,8 @@ app.use("/api/products", productRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/uploads", express.static("uploads"))
 
-app.listen(5000, () => {
-    console.log("Server berjalan di port 5000");
+const PORT = process.env.PORT || 5001;
+app.listen(PORT, () => {
+    console.log(`Server berjalan di port ${PORT}`);
 });
 
