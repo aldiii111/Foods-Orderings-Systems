@@ -14,7 +14,9 @@ app.get("/", (req, res) => {
 
 app.use("/api/products", productRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/uploads", express.static("uploads"))
 
 app.listen(5000, () => {
     console.log("Server berjalan di port 5000");
 });
+

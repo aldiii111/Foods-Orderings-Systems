@@ -9,9 +9,9 @@ const {
     updateProduct,
 } = require("../controllers/productController");
 
+
 router.get("/", authMiddleware, getProducts);
 router.post("/", authMiddleware, createProduct);
 router.get("/:id", authMiddleware, getProductById);
 router.put("/:id", authMiddleware, updateProduct);
-
 module.exports = router;

@@ -26,6 +26,12 @@ const createProduct = async (req, res) => {
     try {
         const { name, description, price, stock } = req.body;
 
+        if (!name || !price) {
+            return res.status(400).json({
+                message: "Nama dan harga wajib diisi",
+            });
+        }
+
         const product = await prisma.product.create({
             data: {
                 name,
@@ -91,11 +97,10 @@ const updateProduct = async (req, res) => {
 }
 
 
-
-
 module.exports = {
     getProducts,
     createProduct,
     getProductById,
     updateProduct,
+
 };
