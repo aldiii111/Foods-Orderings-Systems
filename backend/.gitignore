@@ -1,11 +1,4 @@
-# Dependencies
 node_modules/
-
-# Environment
 .env
-
-# Prisma generated client
-/src/generated/prisma
-
 uploads/
 food_ordering_backup.sql
