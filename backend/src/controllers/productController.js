@@ -88,4 +88,5 @@ module.exports = {
     getProducts,
     createProduct,
     getProductById,
+    updateProduct,
 };
