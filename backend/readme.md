@@ -56,12 +56,45 @@ Pastikan sudah terinstall:
 - **Node.js** v18 atau lebih baru → [Download](https://nodejs.org)
 - **PostgreSQL** v15 atau lebih baru
 
-#### Install PostgreSQL (macOS via Homebrew)
+#### Install PostgreSQL
+
+<details>
+<summary><strong>🍎 macOS</strong></summary>
 
 ```bash
+# Via Homebrew
 brew install postgresql@17
 brew services start postgresql@17
 ```
+
+</details>
+
+<details>
+<summary><strong>🪟 Windows</strong></summary>
+
+1. Download installer dari [postgresql.org/download/windows](https://www.postgresql.org/download/windows/)
+2. Jalankan installer, ikuti wizard (catat password yang diset untuk user `postgres`)
+3. Pastikan centang **pgAdmin** dan **Command Line Tools**
+4. PostgreSQL akan otomatis berjalan sebagai Windows Service
+
+Atau via **Chocolatey**:
+```powershell
+choco install postgresql17
+```
+
+</details>
+
+<details>
+<summary><strong>🐧 Linux (Ubuntu/Debian)</strong></summary>
+
+```bash
+sudo apt update
+sudo apt install postgresql postgresql-contrib
+sudo systemctl start postgresql
+sudo systemctl enable postgresql
+```
+
+</details>
 
 ---
 
@@ -81,33 +114,54 @@ npm install
 
 Copy file `.env.example` menjadi `.env`, lalu sesuaikan nilainya:
 
+**macOS / Linux:**
 ```bash
 cp .env.example .env
+```
+
+**Windows (Command Prompt):**
+```cmd
+copy .env.example .env
+```
+
+**Windows (PowerShell):**
+```powershell
+Copy-Item .env.example .env
 ```
 
 Edit file `.env`:
 
 ```env
 # Sesuaikan dengan credential PostgreSQL kamu
-DATABASE_URL="postgresql://your_username@localhost:5432/food_ordering"
+DATABASE_URL="postgresql://your_username:your_password@localhost:5432/food_ordering"
 
 # Ganti dengan secret key random
 JWT_SECRET="ganti-dengan-string-random-yang-kuat"
 ```
 
-> **💡 Tips:** Di macOS (Homebrew), default user PostgreSQL = username macOS kamu, tanpa password.
-> Contoh: `postgresql://nurrohmanmarduki@localhost:5432/food_ordering`
+> **💡 Contoh DATABASE_URL per OS:**
+>
+> | OS | Contoh |
+> |----|--------|
+> | **macOS** (Homebrew) | `postgresql://nurrohmanmarduki@localhost:5432/food_ordering` (tanpa password) |
+> | **Windows** | `postgresql://postgres:password_kamu@localhost:5432/food_ordering` |
+> | **Linux** | `postgresql://postgres:password_kamu@localhost:5432/food_ordering` |
 
 ### Step 4: Buat Database PostgreSQL
 
+**macOS / Linux:**
 ```bash
 createdb food_ordering
 ```
 
-Atau via `psql`:
+**Windows (Command Prompt / PowerShell):**
+```powershell
+createdb -U postgres food_ordering
+```
 
+Atau via `psql` (semua OS):
 ```bash
-psql -U your_username -c "CREATE DATABASE food_ordering;"
+psql -U postgres -c "CREATE DATABASE food_ordering;"
 ```
 
 ### Step 5: Generate Prisma Client & Jalankan Migrasi

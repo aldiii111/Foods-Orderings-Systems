@@ -65,7 +65,48 @@ Foods-Orderings-Systems/
 ### Prerequisites
 
 - **Node.js** v18+ → [Download](https://nodejs.org)
-- **PostgreSQL** v15+ → `brew install postgresql@17` (macOS)
+- **PostgreSQL** v15+ → Lihat panduan install di bawah
+- **Git** → [Download](https://git-scm.com)
+
+#### Install PostgreSQL
+
+<details>
+<summary><strong>🍎 macOS</strong></summary>
+
+```bash
+# Via Homebrew
+brew install postgresql@17
+brew services start postgresql@17
+```
+
+</details>
+
+<details>
+<summary><strong>🪟 Windows</strong></summary>
+
+1. Download installer dari [postgresql.org/download/windows](https://www.postgresql.org/download/windows/)
+2. Jalankan installer, ikuti wizard (catat password yang diset untuk user `postgres`)
+3. Pastikan centang **pgAdmin** dan **Command Line Tools**
+4. PostgreSQL akan otomatis berjalan sebagai Windows Service
+
+Atau via **Chocolatey**:
+```powershell
+choco install postgresql17
+```
+
+</details>
+
+<details>
+<summary><strong>🐧 Linux (Ubuntu/Debian)</strong></summary>
+
+```bash
+sudo apt update
+sudo apt install postgresql postgresql-contrib
+sudo systemctl start postgresql
+sudo systemctl enable postgresql
+```
+
+</details>
 
 ### 1. Clone Repository
 
@@ -76,13 +117,21 @@ cd Foods-Orderings-Systems
 
 ### 2. Setup Database
 
+**macOS / Linux:**
 ```bash
-# Start PostgreSQL (macOS Homebrew)
-brew services start postgresql@17
-
-# Buat database
 createdb food_ordering
 ```
+
+**Windows (Command Prompt / PowerShell):**
+```powershell
+# Jika PostgreSQL ada di PATH:
+createdb -U postgres food_ordering
+
+# Atau via psql:
+psql -U postgres -c "CREATE DATABASE food_ordering;"
+```
+
+> **💡 Note:** Di Windows, kamu akan diminta memasukkan password `postgres` yang diset saat instalasi.
 
 ### 3. Setup & Jalankan Backend
 

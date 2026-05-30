@@ -73,8 +73,19 @@ npm install
 
 Copy file `.env.example` menjadi `.env`:
 
+**macOS / Linux:**
 ```bash
 cp .env.example .env
+```
+
+**Windows (Command Prompt):**
+```cmd
+copy .env.example .env
+```
+
+**Windows (PowerShell):**
+```powershell
+Copy-Item .env.example .env
 ```
 
 Edit file `.env` jika perlu:
