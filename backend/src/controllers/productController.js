@@ -3,7 +3,17 @@ const prisma = require("../lib/prisma");
 
 const getProducts = async (req, res) => {
     try {
-        const products = await prisma.product.findMany();
+        const search = req.query.search || "";
+        const page = number(req.query.page) || 1;
+        const limit = number(req.query.limit) || 10;
+        const products = await prisma.product.findMany({
+            where: {
+                name: {
+                    contains: search,
+                    mode: "insensitive",
+                }
+            }
+        })
 
         res.json(products);
     } catch (error) {
