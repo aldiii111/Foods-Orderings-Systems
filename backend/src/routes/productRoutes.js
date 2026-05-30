@@ -1,7 +1,7 @@
 const express = require("express");
 
 const router = express.Router();
-
+const authMiddleware = require("../middleware/authMiddleware");
 const {
     getProducts,
     createProduct,
@@ -9,9 +9,9 @@ const {
     updateProduct,
 } = require("../controllers/productController");
 
-router.get("/", getProducts);
-router.post("/", createProduct);
-router.get("/:id", getProductById);
-router.put("/:id", updateProduct);
 
+router.get("/", authMiddleware, getProducts);
+router.post("/", authMiddleware, createProduct);
+router.get("/:id", authMiddleware, getProductById);
+router.put("/:id", authMiddleware, updateProduct);
 module.exports = router;

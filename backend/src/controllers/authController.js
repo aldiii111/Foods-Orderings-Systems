@@ -7,9 +7,7 @@ const login = async (req, res) => {
         const { email, password } = req.body;
 
         const user = await prisma.user.findUnique({
-            where: {
-                email,
-            },
+            where: { email },
         });
 
         if (!user) {
@@ -50,6 +48,46 @@ const login = async (req, res) => {
     }
 };
 
+const register = async (req, res) => {
+    try {
+        const { name, email, password } = req.body;
+
+        const existingUser = await prisma.user.findUnique({
+            where: { email },
+        });
+
+        if (existingUser) {
+            return res.status(400).json({
+                message: "Email sudah digunakan",
+            });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const user = await prisma.user.create({
+            data: {
+                name,
+                email,
+                password: hashedPassword,
+            },
+        });
+
+        res.status(201).json({
+            message: "Register berhasil",
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+            },
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: error.message,
+        });
+    }
+};
+
 module.exports = {
     login,
+    register,
 };
