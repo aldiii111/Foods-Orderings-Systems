@@ -4,8 +4,9 @@ import type { LoginRequest, LoginResponse, RegisterRequest, RegisterResponse } f
 export const authService = {
   async login(data: LoginRequest): Promise<LoginResponse> {
     const response = await api.post<LoginResponse>("/auth/login", data);
-    const { token } = response.data;
+    const { token, user } = response.data;
     localStorage.setItem("token", token);
+    localStorage.setItem("role", user.role);
     return response.data;
   },
 
