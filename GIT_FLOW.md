@@ -34,6 +34,40 @@ main ← staging ← feature/*
 
 ---
 
+## 🖥️ Rekomendasi Setup Terminal
+
+Project ini terdiri dari **backend** dan **frontend** yang berjalan terpisah. Untuk development yang efisien, disarankan membuka **minimal 4 terminal** secara bersamaan:
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                        TERMINAL SETUP                                   │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│   Terminal 1 📦  →  cd backend/     →  npm run dev                      │
+│                     (Running backend dev server di port 5000)           │
+│                                                                         │
+│   Terminal 2 🗄️  →  cd backend/     →  npx prisma studio                │
+│                     (Running Prisma Studio untuk manage database)       │
+│                                                                         │
+│   Terminal 3 🎨  →  cd frontend/    →  npm run dev                      │
+│                     (Running frontend dev server di port 5173)          │
+│                                                                         │
+│   Terminal 4 🌿  →  (root folder)   →  git status, git add, git commit  │
+│                     (Khusus untuk semua operasi Git)                    │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+> **💡 Kenapa 4 terminal?**
+> - Terminal 1-3 digunakan untuk **menjalankan service** yang berjalan terus-menerus
+> - Terminal 4 **khusus untuk Git** agar tidak mengganggu service yang sedang running
+> - Bisa tambah terminal lagi jika diperlukan (misal untuk running test, install package, dll)
+
+> [!IMPORTANT]
+> **Terminal 4 (Git) harus berada di root folder project** (`Foods-Orderings-Systems/`), **bukan** di dalam folder `backend/` atau `frontend/`. Ini memastikan semua perubahan dari kedua folder ter-track dengan benar saat commit.
+
+---
+
 ## 🌳 Branch Structure
 
 ### Branch Utama
@@ -84,7 +118,19 @@ git checkout -b feat/nama-fitur
 
 Kerjakan fitur di branch kamu. Gunakan **conventional commit messages**:
 
+> [!CAUTION]
+> **Jalankan perintah `git add` dan `git commit` dari ROOT folder project** (`Foods-Orderings-Systems/`), **BUKAN** dari dalam folder `backend/` atau `frontend/`. Jika kamu sedang berada di dalam subfolder, keluar dulu sebelum commit:
+> ```bash
+> # ❌ SALAH — commit dari dalam subfolder
+> ~/Foods-Orderings-Systems/backend$ git add .
+> 
+> # ✅ BENAR — commit dari root folder
+> ~/Foods-Orderings-Systems$ git add .
+> ```
+> Atau lebih mudah lagi, gunakan **Terminal 4** yang memang sudah di root folder (lihat [Rekomendasi Setup Terminal](#️-rekomendasi-setup-terminal)).
+
 ```bash
+# Pastikan kamu di root folder!
 # Format: <type>: <deskripsi singkat>
 git add .
 git commit -m "feat: tambah halaman login"
@@ -104,8 +150,14 @@ git commit -m "feat: tambah halaman login"
 
 ### 3. Push & Buat Pull Request
 
+> [!WARNING]
+> **Sebelum push & buat PR, WAJIB pull dulu dari `staging`!** Ini untuk memastikan branch kamu sudah include perubahan terbaru dan mengurangi kemungkinan conflict saat review.
+
 ```bash
-# Push branch ke remote
+# ⚡ WAJIB: Pull terbaru dari staging sebelum push
+git pull origin staging
+
+# Resolve conflict jika ada, lalu:
 git push origin feat/nama-fitur
 ```
 
@@ -124,6 +176,19 @@ feat/nama-fitur  →  (Pull Request)  →  staging
 - Reviewer melakukan **code review**
 - Jika sudah OK, **merge** PR ke `staging`
 - Branch fitur bisa di-delete setelah merge
+
+> [!IMPORTANT]
+> **Setelah ada merge ke `staging`, SEMUA developer harus pull terbaru dari `staging`!**
+> Ini berlaku baik untuk kamu yang baru saja merge, maupun developer lain yang sedang mengerjakan fitur di branch mereka sendiri.
+> ```bash
+> # Jika kamu masih di branch fitur:
+> git pull origin staging
+> 
+> # Atau jika mau mulai fitur baru:
+> git checkout staging
+> git pull origin staging
+> git checkout -b feat/fitur-selanjutnya
+> ```
 
 ### 5. Release ke Production
 
@@ -179,7 +244,10 @@ staging  →  (Pull Request)  →  main
 2. **Selalu buat Pull Request** untuk merge ke `staging` atau `main`
 3. **Tulis commit message yang jelas** menggunakan conventional commit
 4. **Pull terbaru dari `staging`** sebelum mulai kerja fitur baru
-5. **Delete branch** setelah PR sudah di-merge
+5. **Pull terbaru dari `staging`** sebelum push & buat PR
+6. **Pull terbaru dari `staging`** setelah ada merge dari developer lain
+7. **Jalankan git command dari root folder** — bukan dari `backend/` atau `frontend/`
+8. **Delete branch** setelah PR sudah di-merge
 
 ---
 
@@ -218,6 +286,7 @@ git pull origin staging
 git checkout -b feat/shopping-cart
 
 # 3. Kerjakan fitur, commit berkala
+#    ⚠️ Pastikan commit dari ROOT folder, bukan dari backend/ atau frontend/
 git add .
 git commit -m "feat: add cart model and migration"
 
@@ -227,13 +296,17 @@ git commit -m "feat: add cart API endpoints"
 git add .
 git commit -m "feat: add cart UI component"
 
-# 4. Push ke remote
+# 4. Sebelum push, PULL dulu dari staging!
+git pull origin staging
+# (resolve conflict jika ada)
+
+# 5. Push ke remote
 git push origin feat/shopping-cart
 
-# 5. Buat Pull Request di GitHub
+# 6. Buat Pull Request di GitHub
 #    Base: staging ← Compare: feat/shopping-cart
 
-# 6. Setelah di-review & di-merge, delete branch
+# 7. Setelah di-review & di-merge, PULL terbaru dari staging
 git checkout staging
 git pull origin staging
 git branch -d feat/shopping-cart
