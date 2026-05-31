@@ -1,4 +1,3 @@
-
 const prisma = require("../lib/prisma");
 
 const getProducts = async (req, res) => {
@@ -24,7 +23,13 @@ const getProducts = async (req, res) => {
 
 const createProduct = async (req, res) => {
     try {
-        const { name, description, price, stock } = req.body;
+        const {
+            name,
+            description,
+            price,
+            stock,
+            image,
+        } = req.body;
 
         if (!name || !price) {
             return res.status(400).json({
@@ -38,6 +43,7 @@ const createProduct = async (req, res) => {
                 description,
                 price,
                 stock,
+                image,
             },
         });
 
@@ -52,55 +58,76 @@ const createProduct = async (req, res) => {
 const getProductById = async (req, res) => {
     try {
         const id = Number(req.params.id);
+
         const product = await prisma.product.findUnique({
             where: {
                 id,
             },
         });
+
         if (!product) {
             return res.status(404).json({
-                message: "produk tidak ditemukan",
+                message: "Produk tidak ditemukan",
             });
         }
+
         res.json(product);
     } catch (error) {
         res.status(500).json({
             message: error.message,
         });
-
     }
-}
+};
 
 const updateProduct = async (req, res) => {
     try {
         const id = Number(req.params.id);
-        const { name, description, price, stock } = req.body;
+
+        const {
+            name,
+            description,
+            price,
+            stock,
+            image,
+        } = req.body;
+
         const product = await prisma.product.update({
             where: {
                 id,
-
             },
             data: {
                 name,
                 description,
                 price,
                 stock,
-
-            }
+                image,
+            },
         });
-        res.json(product)
+
+        res.json(product);
     } catch (error) {
         res.status(500).json({
             message: error.message,
-        })
+        });
     }
-}
+};
 
+const uploadImage = async (req, res) => {
+    try {
+        res.json({
+            imageUrl: `/uploads/${req.file.filename}`,
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: error.message,
+        });
+    }
+};
 
 module.exports = {
     getProducts,
     createProduct,
     getProductById,
     updateProduct,
-
+    uploadImage,
 };
