@@ -214,6 +214,7 @@ npm run dev
 |---------|-----------|
 | [`backend/readme.md`](./backend/readme.md) | Setup backend, API docs, contoh curl |
 | [`frontend/readme.md`](./frontend/readme.md) | Setup frontend, design system, panduan development |
+| [`GIT_FLOW.md`](./GIT_FLOW.md) | Strategi branching & alur kerja Git |
 
 ---
 
