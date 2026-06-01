@@ -34,12 +34,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setRole(decoded.role);
     }
     setIsAuthenticated(true);
-
-    if (decoded.role === "customer") {
-      window.location.href = "/customer";
-    } else if (decoded.role === "staff") {
-      window.location.href = "/staff";
-    }
   };
 
   const logout = () => {

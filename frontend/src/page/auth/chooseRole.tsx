@@ -19,10 +19,12 @@ export function ChooseRole() {
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 flex flex-col items-center gap-3">
-          <div className="flex size-12 items-center justify-center rounded-2xl bg-primary shadow-lg shadow-primary/25">
-            <UtensilsCrossed className="size-6 text-white some amaz_foreground" />
+          <div className="flex size-18 items-center justify-center rounded-2xl bg-primary shadow-lg shadow-primary/25">
+            <UtensilsCrossed className="size-10 text-white some amaz_foreground" />
           </div>
-          <h1 className="text-2xl font-semibold tracking-tight">FoodOrder</h1>
+          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            Food<span className="text-primary">Order</span>
+          </h1>
         </div>
 
         <Card className="border-border/50 shadow-xl shadow-black/5">
@@ -54,10 +56,10 @@ export function ChooseRole() {
                   <User className="size-5" />
                 </div>
                 <div className="space-y-1 pr-2">
-                  <div className="font-medium text-sm text-foreground leading-none">
+                  <div className="font-medium text-md text-foreground leading-none">
                     Pelanggan
                   </div>
-                  <p className="text-xs text-muted-foreground leading-normal">
+                  <p className="text-sm text-muted-foreground leading-normal">
                     Pesan makanan & nikmati hidangan favoritmu
                   </p>
                 </div>
@@ -82,10 +84,10 @@ export function ChooseRole() {
                   <ChefHat className="size-5" />
                 </div>
                 <div className="space-y-1 pr-2">
-                  <div className="font-medium text-sm text-foreground leading-none">
+                  <div className="font-medium text-md text-foreground leading-none">
                     Staff Restoran
                   </div>
-                  <p className="text-xs text-muted-foreground leading-normal">
+                  <p className="text-sm text-muted-foreground leading-normal">
                     Kelola menu, stok, dan proses semua pesanan
                   </p>
                 </div>
@@ -96,6 +98,7 @@ export function ChooseRole() {
               onClick={handleSelectRole}
               className="w-full"
               disabled={!selectedRole}
+              size="sm"
             >
               Lanjutkan
               <ChevronRight className="ml-2 size-4" />

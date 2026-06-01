@@ -71,10 +71,12 @@ export function Register() {
         <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 px-4">
             <div className="w-full max-w-sm">
                 <div className="mb-8 flex flex-col items-center gap-3">
-                    <div className="flex size-12 items-center justify-center rounded-2xl bg-primary shadow-lg shadow-primary/25">
-                        <UtensilsCrossed className="size-6 text-primary-foreground" />
+                    <div className="flex size-18 items-center justify-center rounded-2xl bg-primary shadow-lg shadow-primary/25">
+                        <UtensilsCrossed className="size-10 text-primary-foreground" />
                     </div>
-                    <h1 className="text-2xl font-semibold tracking-tight">FoodOrder</h1>
+                    <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
+                        Food<span className="text-primary">Order</span>
+                    </h1>
                 </div>
 
                 <Card className="border-border/50 shadow-xl shadow-black/5">
@@ -129,7 +131,7 @@ export function Register() {
                                 />
                             </div>
 
-                            <Button type="submit" className="w-full" disabled={loading}>
+                            <Button size="sm" type="submit" className="w-full" disabled={loading}>
                                 {loading && <Loader2 className="size-4 animate-spin" data-icon="inline-start" />}
                                 {loading ? "Memproses..." : "Daftar"}
                             </Button>
