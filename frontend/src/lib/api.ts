@@ -1,45 +1,38 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:5173/api/products",
+  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api",
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-export const getProducts = (search?: string) => {
-  return api.get("/", { 
-    params: search ? { search } : {} 
-  });
-};
-
-export const createProduct = (data: {
-  name: string;
-  description: string;
-  price: number;
-  stock: number;
-}) => {
-  return api.post("/", data);
-};
-
-export const getProductById = (id: number | string) => {
-  return api.get(`/${id}`);
-};
-export const updateProduct = (
-  id: number | string,
-  data: {
-    name?: string;
-    description?: string;
-    price?: number;
-    stock?: number;
+// Interceptor: auto-inject Authorization header jika token ada
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
-) => {
-  return api.put(`/${id}`, data);
-};
+  return config;
+});
 
-export const deleteProduct = (id: number | string) => {
-  return api.delete(`/${id}`);
-};
+// Interceptor: handle 401 response (token expired/invalid)
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem("token");
+      // Redirect ke login jika bukan di halaman auth
+      const isAuthPage =
+        window.location.pathname === "/login" ||
+        window.location.pathname === "/register";
+      if (!isAuthPage) {
+        window.location.href = "/login";
+      }
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default api;
