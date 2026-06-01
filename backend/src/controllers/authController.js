@@ -40,6 +40,12 @@ const login = async (req, res) => {
 
         res.json({
             token,
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+            },
         });
     } catch (error) {
         res.status(500).json({
@@ -50,7 +56,12 @@ const login = async (req, res) => {
 
 const register = async (req, res) => {
     try {
-        const { name, email, password } = req.body;
+        const {
+            name,
+            email,
+            password,
+            role,
+        } = req.body;
 
         const existingUser = await prisma.user.findUnique({
             where: { email },
@@ -62,13 +73,26 @@ const register = async (req, res) => {
             });
         }
 
-        const hashedPassword = await bcrypt.hash(password, 10);
+        if (
+            role &&
+            !["customer", "staff"].includes(role)
+        ) {
+            return res.status(400).json({
+                message: "Role tidak valid",
+            });
+        }
+
+        const hashedPassword = await bcrypt.hash(
+            password,
+            10
+        );
 
         const user = await prisma.user.create({
             data: {
                 name,
                 email,
                 password: hashedPassword,
+                role: role || "customer",
             },
         });
 
@@ -78,6 +102,7 @@ const register = async (req, res) => {
                 id: user.id,
                 name: user.name,
                 email: user.email,
+                role: user.role,
             },
         });
     } catch (error) {
