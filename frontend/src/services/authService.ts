@@ -27,9 +27,7 @@ export const authService = {
     return !!localStorage.getItem("token");
   },
 
-  /**
-   * Decode JWT payload (tanpa validasi signature — hanya untuk UI)
-   */
+
   getDecodedToken(): { id: number; role: string } | null {
     const token = localStorage.getItem("token");
     if (!token) return null;

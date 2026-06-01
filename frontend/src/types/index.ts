@@ -19,7 +19,7 @@ export interface LoginResponse {
         id: number;
         name: string;
         email: string;
-        role: "customer" | "staff";
+        role: "customer" | "staff" | string;
     };
 }
 
@@ -27,7 +27,7 @@ export interface RegisterRequest {
     name: string;
     email: string;
     password: string;
-    role: "customer" | "staff";
+    role: "customer" | "staff" | string;
 }
 
 export interface RegisterResponse {
@@ -36,6 +36,7 @@ export interface RegisterResponse {
         id: number;
         name: string;
         email: string;
+        role: "customer" | "staff" | string;
     };
 }
 
