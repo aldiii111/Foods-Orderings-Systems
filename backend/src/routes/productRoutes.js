@@ -11,6 +11,7 @@ const {
     getProductById,
     updateProduct,
     uploadImage,
+    deleteProduct,
 } = require("../controllers/productController");
 
 router.get("/", authMiddleware, getProducts);
@@ -20,6 +21,8 @@ router.post("/", authMiddleware, createProduct);
 router.get("/:id", authMiddleware, getProductById);
 
 router.put("/:id", authMiddleware, updateProduct);
+
+router.delete("/:id", authMiddleware, deleteProduct);
 
 router.post(
     "/upload",
