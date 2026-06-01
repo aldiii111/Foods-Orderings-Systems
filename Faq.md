@@ -1,6 +1,7 @@
 # FAQ – Git Branching Guide
 
-## 1. Bagaimana cara membuat branch baru?
+<details>
+<summary>1. Bagaimana cara membuat branch baru?</summary>
 
 1. **Pastikan branch `staging` ada secara lokal**
    - Jika belum ada, lakukan fetch dari remote terlebih dahulu:
@@ -19,8 +20,10 @@
    - Sekarang Anda berada di branch baru yang berbasiskan `staging`.
 
 ---
+</details>
 
-## 2. Bagaimana cara mencoba (checkout) branch orang lain?
+<details>
+<summary>2. Bagaimana cara mencoba (checkout) branch orang lain?</summary>
 
 1. **Pastikan semua perubahan di branch lokal Anda sudah di‑add dan commit**
    ```bash
@@ -38,6 +41,7 @@
    - Perintah ini membuat branch lokal `<nama-branch>` yang melacak branch yang sama pada remote `origin`.
 
 ---
+</details>
 
 ### Tips Tambahan
 - Gunakan `git branch -vv` untuk melihat branch mana yang melacak remote mana.
