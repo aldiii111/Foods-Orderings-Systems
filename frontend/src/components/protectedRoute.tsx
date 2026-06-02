@@ -15,7 +15,7 @@ export function ProtectedRoute({
   }
 
   if (!allowedRoles.includes(role as "customer" | "staff")) {
-    return <Navigate to="/unauthorized" />;
+    return <Navigate to="/choose-role" />;
   }
 
   return children;
