@@ -41,6 +41,9 @@ git checkout -b <nama-branch-baru>
 
 ```bash
 git add .
+```
+
+```bash
 git commit -m "Simpan perubahan sebelum beralih branch"
 ```
 
