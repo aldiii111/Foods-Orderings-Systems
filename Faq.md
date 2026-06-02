@@ -4,7 +4,7 @@
 
   <div style="margin-bottom: 12px; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background: #ffffff; transition: box-shadow 0.2s ease;">
     <details>
-      <summary style="padding: 16px 20px; font-weight: 600; font-size: 1rem; color: #1e293b; background: #f8fafc; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid transparent; user-select: none; transition: background 0.2s ease, color 0.2s ease; list-style: none;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#f8fafc'">▶ 1. Bagaimana cara membuat branch baru?</summary>
+      <summary style="padding: 16px 20px; font-weight: 600; font-size: 1rem; color: #1e293b; background: #f8fafc; cursor: pointer; display: flex; align-items: center; gap: 10px; border: 1px solid #e2e8f0; border-radius: 12px; user-select: none; transition: background 0.2s ease, color 0.2s ease, border-radius 0.2s ease; list-style: none;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#f8fafc'">▶ 1. Bagaimana cara membuat branch baru?</summary>
       <div style="padding: 20px 24px; background: #ffffff; line-height: 1.7; color: #334155;">
         <ol style="padding-left: 0; list-style: none;">
           <li style="margin-bottom: 16px;">
@@ -32,7 +32,7 @@
 
   <div style="margin-bottom: 12px; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background: #ffffff; transition: box-shadow 0.2s ease;">
     <details>
-      <summary style="padding: 16px 20px; font-weight: 600; font-size: 1rem; color: #1e293b; background: #f8fafc; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid transparent; user-select: none; transition: background 0.2s ease, color 0.2s ease; list-style: none;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#f8fafc'">▶ 2. Bagaimana cara mencoba (checkout) branch orang lain?</summary>
+      <summary style="padding: 16px 20px; font-weight: 600; font-size: 1rem; color: #1e293b; background: #f8fafc; cursor: pointer; display: flex; align-items: center; gap: 10px; border: 1px solid #e2e8f0; border-radius: 12px; user-select: none; transition: background 0.2s ease, color 0.2s ease, border-radius 0.2s ease; list-style: none;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#f8fafc'">▶ 2. Bagaimana cara mencoba (checkout) branch orang lain?</summary>
       <div style="padding: 20px 24px; background: #ffffff; line-height: 1.7; color: #334155;">
         <ol style="padding-left: 0; list-style: none;">
           <li style="margin-bottom: 16px;">
