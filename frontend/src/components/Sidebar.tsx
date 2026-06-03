@@ -1,69 +1,81 @@
 import { useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "@/context/authContext";
 import {
     LayoutDashboard,
     Boxes,
-    FileText,
-    Receipt,
-    Users,
-    Layers,
-    UserCog,
     ChevronDown,
-    UtensilsCrossed
+    UtensilsCrossed,
+    LogOut
 } from "lucide-react";
 import {
     Sidebar,
-    SidebarHeader,
-    SidebarContent,
-    SidebarGroup,
-    SidebarGroupLabel,
-    SidebarInput,
-    SidebarMenuButton,
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils";
 
 interface MenuItem {
     title: string;
     icon: React.ComponentType<React.ComponentProps<typeof Boxes>>;
-    subItems?: string[];
+    subItems?: { name: string; path: string }[];
 }
 
 export function Sidebars() {
+    const location = useLocation();
+    const navigate = useNavigate();
+    const { logout } = useAuth();
+    
     const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({
         Inventory: true,
-        Quotations: true,
-        "Invoices & Sales": true,
-        Admin: true,
     });
 
     const toggleMenu = (title: string) => {
         setOpenMenus((prev) => ({ ...prev, [title]: !prev[title] }));
     };
 
+    const handleLogout = () => {
+        logout();
+        navigate("/login");
+    };
+
     const menuItems: MenuItem[] = [
-        { title: "Inventory", icon: Boxes, subItems: ["All Products", "Add Product", "Stock Movements"] },
-        { title: "Quotations", icon: FileText, subItems: ["All Quotations", "Create Quotation"] },
-        { title: "Invoices & Sales", icon: Receipt, subItems: ["All Invoices", "Create Invoice", "Sales Reports"] },
-        { title: "Customers", icon: Users },
-        { title: "Integrations", icon: Layers },
-        { title: "Admin", icon: UserCog, subItems: ["Settings", "Users"] },
+        { 
+            title: "Inventory", 
+            icon: Boxes, 
+            subItems: [
+                { name: "Semua Produk", path: "/staff/products" },
+            ] 
+        },
     ];
+
+    const isDashboardActive = location.pathname === "/staff/dashboard" || location.pathname === "/staff";
 
     return (
         <Sidebar className="flex h-screen w-64 flex-col border-r border-border bg-card">
+            {/* Header */}
             <div className="flex h-22 items-center justify-between border-b border-border px-4.5">
                 <div className="flex size-8 items-center justify-center rounded-md bg-primary shadow-lg shadow-primary/25">
-                    <UtensilsCrossed className="size-5 text-white some amaz_foreground" />
+                    <UtensilsCrossed className="size-5 text-white" />
                 </div>
                 <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
                     Food<span className="text-primary">Order</span>
                 </h1>
             </div>
 
+            {/* Navigation */}
             <nav className="flex-1 space-y-1 overflow-y-auto p-4">
-                <button className="flex active:bg-primary/70 w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-primary-foreground shadow-sm shadow-primary/10 transition-all hover:bg-primary/25">
-                    <LayoutDashboard className="h-5 w-5" />
-                    Dashboard
-                </button>
+                <Link to="/staff/dashboard">
+                    <button 
+                        className={cn(
+                            "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all cursor-pointer",
+                            isDashboardActive 
+                                ? "bg-primary text-primary-foreground shadow-sm shadow-primary/10" 
+                                : "text-muted-foreground hover:bg-primary/10 hover:text-foreground"
+                        )}
+                    >
+                        <LayoutDashboard className="h-5 w-5" />
+                        Dashboard
+                    </button>
+                </Link>
 
                 <div className="space-y-1 pt-4">
                     {menuItems.map((item) => {
@@ -76,12 +88,12 @@ export function Sidebars() {
                                 <button
                                     onClick={() => hasSub && toggleMenu(item.title)}
                                     className={cn(
-                                        "group flex w-full items-center justify-between rounded-lg px-3 py-2 font-medium text-muted-foreground transition-colors hover:bg-primary/25 active:bg-primary/70 hover:text-foreground/70",
-                                        isOpen && hasSub && "text-foreground/70"
+                                        "group flex w-full items-center justify-between rounded-lg px-3 py-2.5 font-medium text-muted-foreground transition-colors hover:bg-primary/10 hover:text-foreground cursor-pointer",
+                                        isOpen && hasSub && "text-foreground"
                                     )}
                                 >
-                                    <div className="flex items-center gap-3 ">
-                                        <Icon className="h-5 w-5 text-muted-foreground transition-colors group-hover:text-foreground/70" />
+                                    <div className="flex items-center gap-3">
+                                        <Icon className="h-5 w-5 text-muted-foreground group-hover:text-foreground" />
                                         <span className="text-md">{item.title}</span>
                                     </div>
                                     {hasSub && (
@@ -96,14 +108,23 @@ export function Sidebars() {
 
                                 {hasSub && isOpen && (
                                     <div className="space-y-1 pl-11 pr-2">
-                                        {item.subItems?.map((sub) => (
-                                            <button
-                                                key={sub}
-                                                className="flex w-full rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-primary/25 active:bg-primary/70 hover:text-foreground/70 text-left"
-                                            >
-                                                {sub}
-                                            </button>
-                                        ))}
+                                        {item.subItems?.map((sub) => {
+                                            const isSubActive = location.pathname === sub.path;
+                                            return (
+                                                <Link key={sub.name} to={sub.path}>
+                                                    <button
+                                                        className={cn(
+                                                            "flex w-full rounded-md px-3 py-2 text-sm font-medium transition-colors text-left cursor-pointer",
+                                                            isSubActive 
+                                                                ? "bg-primary/10 text-primary" 
+                                                                : "text-muted-foreground hover:bg-primary/5 hover:text-foreground"
+                                                        )}
+                                                    >
+                                                        {sub.name}
+                                                    </button>
+                                                </Link>
+                                            );
+                                        })}
                                     </div>
                                 )}
                             </div>
@@ -111,6 +132,17 @@ export function Sidebars() {
                     })}
                 </div>
             </nav>
+
+            {/* Logout at bottom */}
+            <div className="border-t border-border p-4">
+                <button
+                    onClick={handleLogout}
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
+                >
+                    <LogOut className="h-5 w-5" />
+                    Keluar (Logout)
+                </button>
+            </div>
         </Sidebar>
     );
 }

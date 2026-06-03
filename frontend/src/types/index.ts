@@ -57,6 +57,7 @@ export interface ProductFormData {
     description?: string;
     price: number;
     stock: number;
+    image?: string | null;
 }
 
 // ============ API Error ============
@@ -64,3 +65,13 @@ export interface ProductFormData {
 export interface ApiError {
     message: string;
 }
+
+// ============ Dashboard Types ============
+
+export interface DashboardData {
+    totalProducts: number;
+    totalStock: number;
+    totalCustomers: number;
+    quote: string;
+}
+

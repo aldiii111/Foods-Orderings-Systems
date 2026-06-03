@@ -22,4 +22,15 @@ export const productService = {
     const response = await api.put<Product>(`/products/${id}`, data);
     return response.data;
   },
+
+  async uploadImage(file: File): Promise<{ imageUrl: string }> {
+    const formData = new FormData();
+    formData.append("image", file);
+    const response = await api.post<{ imageUrl: string }>("/products/upload", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
+  },
 };

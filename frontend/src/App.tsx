@@ -6,7 +6,7 @@ import { ChooseRole } from '@/page/auth/chooseRole'
 import { Login } from '@/page/auth/login'
 import { Register } from '@/page/auth/signUp'
 import { ProtectedRoute } from './components/protectedRoute'
-// import { Customer } from '@/components/layout/customer'
+import { Customer } from '@/components/layout/customer'
 import { Staff } from '@/components/layout/staff'
 
 function RouteApp() {
@@ -16,8 +16,22 @@ function RouteApp() {
       <Route path="/choose-role" element={<ChooseRole />} />
       <Route path="/register" element={<Register />} />
       <Route path="/login" element={<Login />} />
-      {/* <Route path="/customer" element={<Customer />} /> */}
-      <Route path="/staff" element={<Staff />} />
+      <Route
+        path="/customer/*"
+        element={
+          <ProtectedRoute allowedRoles={["customer"]}>
+            <Customer />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/staff/*"
+        element={
+          <ProtectedRoute allowedRoles={["staff"]}>
+            <Staff />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   )
 }
