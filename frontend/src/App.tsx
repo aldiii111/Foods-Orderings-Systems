@@ -5,8 +5,9 @@ import { Home } from '@/page/auth/home'
 import { ChooseRole } from '@/page/auth/chooseRole'
 import { Login } from '@/page/auth/login'
 import { Register } from '@/page/auth/signUp'
+import { ProtectedRoute } from './components/protectedRoute'
 // import { Customer } from '@/components/layout/customer'
-// import { Staff } from '@/components/layout/staff'
+import { Staff } from '@/components/layout/staff'
 
 function RouteApp() {
   return (
@@ -16,7 +17,7 @@ function RouteApp() {
       <Route path="/register" element={<Register />} />
       <Route path="/login" element={<Login />} />
       {/* <Route path="/customer" element={<Customer />} /> */}
-      {/* <Route path="/staff" element={<Staff />} /> */}
+      <Route path="/staff" element={<Staff />} />
     </Routes>
   )
 }
