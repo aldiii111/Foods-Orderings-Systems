@@ -4,7 +4,6 @@ import {
   FileText, 
   Plus, 
   Search, 
-  Calendar,
   CheckCircle2, 
   Clock, 
   XCircle,
@@ -228,9 +227,11 @@ export function Quotations() {
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex justify-center gap-2">
-                            <button className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-muted-foreground hover:text-foreground cursor-pointer">
-                              <Eye className="size-4" />
-                            </button>
+                            <Link to={`/staff/quotations/${q.id}`}>
+                              <button className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-muted-foreground hover:text-foreground cursor-pointer">
+                                <Eye className="size-4" />
+                              </button>
+                            </Link>
                             <button className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-muted-foreground hover:text-foreground cursor-pointer">
                               <Download className="size-4" />
                             </button>

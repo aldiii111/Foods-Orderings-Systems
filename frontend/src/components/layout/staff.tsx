@@ -6,6 +6,7 @@ import { ProductsManage } from "@/page/staff/productsManage";
 import { StockMovements } from "@/page/staff/stockMovements";
 import { Quotations } from "@/page/staff/quotations";
 import { CreateQuotation } from "@/page/staff/createQuotation";
+import { QuotationDetail } from "@/page/staff/quotationDetail";
 import { Invoices } from "@/page/staff/invoices";
 import { CreateInvoice } from "@/page/staff/createInvoice";
 import { SalesReports } from "@/page/staff/salesReports";
@@ -25,6 +26,7 @@ export const Staff: React.FC = () => {
                     <Route path="stock-movements" element={<StockMovements />} />
                     <Route path="quotations" element={<Quotations />} />
                     <Route path="quotations/create" element={<CreateQuotation />} />
+                    <Route path="quotations/:id" element={<QuotationDetail />} />
                     <Route path="invoices" element={<Invoices />} />
                     <Route path="invoices/create" element={<CreateInvoice />} />
                     <Route path="sales-reports" element={<SalesReports />} />

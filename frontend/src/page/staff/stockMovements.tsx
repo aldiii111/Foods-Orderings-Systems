@@ -4,11 +4,11 @@ import {
   ArrowUpRight, 
   ArrowDownRight, 
   Search, 
-  Filter, 
   Download,
   Calendar
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 // ====== BACKEND API REQUIREMENT ======
 // Endpoint: GET /api/inventory/stock-movements

@@ -5,7 +5,6 @@ import {
   Trash2, 
   ArrowLeft, 
   Save, 
-  Check, 
   Calculator, 
   UserPlus
 } from "lucide-react";
