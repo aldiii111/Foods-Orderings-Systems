@@ -23,9 +23,9 @@ export function Home() {
 
         <div className="mt-7 flex gap-3">
           {isAuthenticated ? (
-            <Link to="/products">
+            <Link to="/login">
               <Button size="sm">
-                Lihat Produk
+                Login
                 <ArrowRight className="size-4" data-icon="inline-end" />
               </Button>
             </Link>
