@@ -1,6 +1,7 @@
-const prisma = require("../lib/prisma");
+import { Request, Response } from "express";
+import prisma from "../lib/prisma";
 
-const getDashboard = async (req, res) => {
+export const getDashboard = async (req: Request, res: Response): Promise<any> => {
     try {
         const products = await prisma.product.findMany();
 
@@ -11,19 +12,15 @@ const getDashboard = async (req, res) => {
             0
         );
 
-        res.json({
+        return res.json({
             totalProducts,
             totalStock,
             totalCustomers: 0,
             quote: "Good food is the foundation of genuine happiness."
         });
-    } catch (error) {
-        res.status(500).json({
+    } catch (error: any) {
+        return res.status(500).json({
             message: error.message,
         });
     }
-};
-
-module.exports = {
-    getDashboard,
 };

@@ -1,8 +1,9 @@
-const prisma = require("../lib/prisma");
+import { Request, Response } from "express";
+import prisma from "../lib/prisma";
 
-const getProducts = async (req, res) => {
+export const getProducts = async (req: Request, res: Response): Promise<any> => {
     try {
-        const search = req.query.search || "";
+        const search = (req.query.search as string) || "";
 
         const products = await prisma.product.findMany({
             where: {
@@ -13,15 +14,15 @@ const getProducts = async (req, res) => {
             },
         });
 
-        res.json(products);
-    } catch (error) {
-        res.status(500).json({
+        return res.json(products);
+    } catch (error: any) {
+        return res.status(500).json({
             message: error.message,
         });
     }
 };
 
-const createProduct = async (req, res) => {
+export const createProduct = async (req: Request, res: Response): Promise<any> => {
     try {
         const {
             name,
@@ -31,7 +32,7 @@ const createProduct = async (req, res) => {
             image,
         } = req.body;
 
-        if (!name || !price) {
+        if (!name || price === undefined) {
             return res.status(400).json({
                 message: "Nama dan harga wajib diisi",
             });
@@ -41,21 +42,21 @@ const createProduct = async (req, res) => {
             data: {
                 name,
                 description,
-                price,
-                stock,
+                price: Number(price),
+                stock: stock !== undefined ? Number(stock) : 0,
                 image,
             },
         });
 
-        res.status(201).json(product);
-    } catch (error) {
-        res.status(500).json({
+        return res.status(201).json(product);
+    } catch (error: any) {
+        return res.status(500).json({
             message: error.message,
         });
     }
 };
 
-const getProductById = async (req, res) => {
+export const getProductById = async (req: Request, res: Response): Promise<any> => {
     try {
         const id = Number(req.params.id);
 
@@ -71,15 +72,15 @@ const getProductById = async (req, res) => {
             });
         }
 
-        res.json(product);
-    } catch (error) {
-        res.status(500).json({
+        return res.json(product);
+    } catch (error: any) {
+        return res.status(500).json({
             message: error.message,
         });
     }
 };
 
-const updateProduct = async (req, res) => {
+export const updateProduct = async (req: Request, res: Response): Promise<any> => {
     try {
         const id = Number(req.params.id);
 
@@ -98,36 +99,33 @@ const updateProduct = async (req, res) => {
             data: {
                 name,
                 description,
-                price,
-                stock,
+                price: price !== undefined ? Number(price) : undefined,
+                stock: stock !== undefined ? Number(stock) : undefined,
                 image,
             },
         });
 
-        res.json(product);
-    } catch (error) {
-        res.status(500).json({
+        return res.json(product);
+    } catch (error: any) {
+        return res.status(500).json({
             message: error.message,
         });
     }
 };
 
-const uploadImage = async (req, res) => {
+export const uploadImage = async (req: Request, res: Response): Promise<any> => {
     try {
-        res.json({
+        if (!req.file) {
+            return res.status(400).json({
+                message: "File tidak ditemukan",
+            });
+        }
+        return res.json({
             imageUrl: `/uploads/${req.file.filename}`,
         });
-    } catch (error) {
-        res.status(500).json({
+    } catch (error: any) {
+        return res.status(500).json({
             message: error.message,
         });
     }
-};
-
-module.exports = {
-    getProducts,
-    createProduct,
-    getProductById,
-    updateProduct,
-    uploadImage,
 };
