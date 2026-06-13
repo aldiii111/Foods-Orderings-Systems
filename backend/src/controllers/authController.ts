@@ -1,8 +1,9 @@
-const prisma = require("../lib/prisma");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
+import { Request, Response } from "express";
+import prisma from "../lib/prisma";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
-const login = async (req, res) => {
+export const login = async (req: Request, res: Response): Promise<any> => {
     try {
         const { email, password } = req.body;
 
@@ -32,13 +33,13 @@ const login = async (req, res) => {
                 id: user.id,
                 role: user.role,
             },
-            process.env.JWT_SECRET,
+            process.env.JWT_SECRET || "",
             {
                 expiresIn: "1d",
             }
         );
 
-        res.json({
+        return res.json({
             token,
             user: {
                 id: user.id,
@@ -47,14 +48,14 @@ const login = async (req, res) => {
                 role: user.role,
             },
         });
-    } catch (error) {
-        res.status(500).json({
+    } catch (error: any) {
+        return res.status(500).json({
             message: error.message,
         });
     }
 };
 
-const register = async (req, res) => {
+export const register = async (req: Request, res: Response): Promise<any> => {
     try {
         const {
             name,
@@ -96,7 +97,7 @@ const register = async (req, res) => {
             },
         });
 
-        res.status(201).json({
+        return res.status(201).json({
             message: "Register berhasil",
             user: {
                 id: user.id,
@@ -105,14 +106,9 @@ const register = async (req, res) => {
                 role: user.role,
             },
         });
-    } catch (error) {
-        res.status(500).json({
+    } catch (error: any) {
+        return res.status(500).json({
             message: error.message,
         });
     }
-};
-
-module.exports = {
-    login,
-    register,
 };
