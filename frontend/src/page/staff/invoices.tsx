@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { 
   Receipt, 
@@ -11,71 +11,102 @@ import {
   Download
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { erpService } from "@/services/erpService";
+import type { Invoice } from "@/types";
 import { cn } from "@/lib/utils";
 
-// ====== BACKEND API REQUIREMENT ======
-// Endpoint: GET /api/invoices
-// Query Params: search (string), status (string: 'PAID' | 'UNPAID' | 'OVERDUE' | '')
-// Response: Array of {
-//   id: number;
-//   invoiceNo: string;
-//   customerName: string;
-//   dateCreated: string;
-//   dateDue: string;
-//   totalAmount: number;
-//   status: 'PAID' | 'UNPAID' | 'OVERDUE';
-// }
-
-const DUMMY_INVOICES = [
-  { id: 1, invoiceNo: "INV-2026-001", customerName: "Hotel Santika Premium", dateCreated: "2026-06-01", dateDue: "2026-06-15", totalAmount: 4500000, status: "PAID" },
-  { id: 2, invoiceNo: "INV-2026-002", customerName: "PT Global Tech Solutions", dateCreated: "2026-06-02", dateDue: "2026-06-16", totalAmount: 3200000, status: "UNPAID" },
-  { id: 3, invoiceNo: "INV-2026-003", customerName: "Catering Ibu Fatma", dateCreated: "2026-06-02", dateDue: "2026-06-16", totalAmount: 1800000, status: "PAID" },
-  { id: 4, invoiceNo: "INV-2026-004", customerName: "Wedding Organizer Sinar", dateCreated: "2026-05-15", dateDue: "2026-05-30", totalAmount: 8400000, status: "OVERDUE" },
-];
-
 export function Invoices() {
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"ALL" | "PAID" | "UNPAID" | "OVERDUE">("ALL");
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const filteredInvoices = DUMMY_INVOICES.filter((inv) => {
-    const matchesSearch = 
-      inv.invoiceNo.toLowerCase().includes(search.toLowerCase()) ||
-      inv.customerName.toLowerCase().includes(search.toLowerCase());
-    
-    const matchesStatus = statusFilter === "ALL" || inv.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("ALL");
+
+  useEffect(() => {
+    async function loadInvoices() {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await erpService.getInvoices();
+        setInvoices(data);
+      } catch (err: any) {
+        console.error("Gagal memuat invoices:", err);
+        setError("Gagal memuat data invoice tagihan.");
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadInvoices();
+  }, []);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "PAID":
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-lg dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/20">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-lg">
             <CheckCircle2 className="size-3" />
             Lunas
           </span>
         );
       case "UNPAID":
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 text-[10px] font-extrabold bg-amber-50 text-amber-700 border border-amber-100 rounded-lg dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/20">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-100 rounded-lg">
             <Clock className="size-3" />
             Belum Bayar
           </span>
         );
-      case "OVERDUE":
+      case "PARTIAL":
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 text-[10px] font-extrabold bg-rose-50 text-rose-700 border border-rose-100 rounded-lg dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-900/20">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-100 rounded-lg">
+            <Clock className="size-3" />
+            Sebagian
+          </span>
+        );
+      case "CANCELLED":
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-100 rounded-lg">
             <XCircle className="size-3" />
-            Jatuh Tempo
+            Dibatalkan
           </span>
         );
       default:
-        return null;
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[10px] font-bold bg-slate-50 text-slate-700 border border-slate-100 rounded-lg">
+            {status}
+          </span>
+        );
     }
   };
 
-  const totalSales = DUMMY_INVOICES.reduce((sum, inv) => sum + inv.totalAmount, 0);
-  const paidSales = DUMMY_INVOICES.filter(inv => inv.status === "PAID").reduce((sum, inv) => sum + inv.totalAmount, 0);
+  const handleExportCSV = () => {
+    const headers = "Nomor Invoice,Pelanggan,Tanggal,Total Tagihan,Status Pembayaran\n";
+    const rows = invoices.map(inv => 
+      `"${inv.number}","${inv.customer?.name || ""}","${inv.date}","${inv.totalAmount}","${inv.paymentStatus}"`
+    ).join("\n");
+    
+    const blob = new Blob([headers + rows], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", "foodorder_invoices_list.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const filteredInvoices = invoices.filter((inv) => {
+    const matchesSearch = 
+      inv.number.toLowerCase().includes(search.toLowerCase()) ||
+      (inv.customer?.name || "").toLowerCase().includes(search.toLowerCase());
+    
+    const matchesStatus = statusFilter === "ALL" || inv.paymentStatus === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
+  const totalSales = invoices.reduce((sum, inv) => sum + inv.totalAmount, 0);
+  const paidSales = invoices.filter(inv => inv.paymentStatus === "PAID").reduce((sum, inv) => sum + inv.totalAmount, 0);
 
   return (
     <div className="flex min-h-screen bg-slate-50/50 dark:bg-background antialiased">
@@ -86,38 +117,40 @@ export function Invoices() {
             <h2 className="text-xl font-bold tracking-tight text-foreground">Invoices (Faktur Penjualan)</h2>
             <p className="text-xs text-muted-foreground font-medium">Buat dan kelola invoice tagihan makanan event serta pelanggan korporat.</p>
           </div>
-          <Link to="/staff/invoices/create">
-            <button className="flex items-center gap-2 px-4 py-2 text-sm font-bold bg-primary text-primary-foreground hover:bg-primary/90 transition-all rounded-xl shadow-lg shadow-primary/20 cursor-pointer">
-              <Plus className="size-4" />
-              Buat Invoice
+          <div className="flex gap-2">
+            <button
+              onClick={handleExportCSV}
+              className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold border border-border hover:bg-slate-50 dark:hover:bg-slate-900 rounded-xl transition-all cursor-pointer"
+            >
+              <Download className="size-3.5" />
+              Ekspor CSV
             </button>
-          </Link>
+            <Link to="/staff/invoices/create">
+              <button className="flex items-center gap-2 px-4 py-2 text-sm font-bold bg-primary text-primary-foreground hover:bg-primary/90 transition-all rounded-xl shadow-md cursor-pointer">
+                <Plus className="size-4" />
+                Buat Invoice
+              </button>
+            </Link>
+          </div>
         </header>
 
         {/* Content */}
         <div className="flex-1 p-8 space-y-6 overflow-y-auto">
+          {error && (
+            <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-xs text-destructive font-semibold">
+              {error}
+            </div>
+          )}
           {/* Stats Summary */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             <Card className="border-border/40 shadow-sm rounded-2xl bg-card">
               <CardContent className="p-6 flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider">Total Penjualan Kotor</p>
-                  <h3 className="text-2xl font-black mt-1">Rp {totalSales.toLocaleString("id-ID")}</h3>
+                  <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider font-mono">Total Penjualan</p>
+                  <h3 className="text-xl font-extrabold mt-1">Rp {totalSales.toLocaleString("id-ID")}</h3>
                 </div>
-                <div className="size-10 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center text-muted-foreground">
-                  <Receipt className="size-5" />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-border/40 shadow-sm rounded-2xl bg-card">
-              <CardContent className="p-6 flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-emerald-600 font-bold uppercase tracking-wider">Dana Masuk (Terbayar)</p>
-                  <h3 className="text-2xl font-black mt-1">Rp {paidSales.toLocaleString("id-ID")}</h3>
-                </div>
-                <div className="size-10 bg-emerald-50 dark:bg-emerald-950/20 rounded-xl flex items-center justify-center text-emerald-600">
-                  <CheckCircle2 className="size-5" />
+                <div className="size-9 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center text-muted-foreground">
+                  <Receipt className="size-4.5" />
                 </div>
               </CardContent>
             </Card>
@@ -125,13 +158,25 @@ export function Invoices() {
             <Card className="border-border/40 shadow-sm rounded-2xl bg-card">
               <CardContent className="p-6 flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-amber-600 font-bold uppercase tracking-wider">Piutang (Belum Terbayar)</p>
-                  <h3 className="text-2xl font-black mt-1">
+                  <p className="text-[10px] text-emerald-600 font-bold uppercase tracking-wider font-mono">Terbayar (Paid)</p>
+                  <h3 className="text-xl font-extrabold mt-1">Rp {paidSales.toLocaleString("id-ID")}</h3>
+                </div>
+                <div className="size-9 bg-emerald-50 dark:bg-emerald-950/20 rounded-lg flex items-center justify-center text-emerald-600">
+                  <CheckCircle2 className="size-4.5" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-border/40 shadow-sm rounded-2xl bg-card">
+              <CardContent className="p-6 flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] text-amber-600 font-bold uppercase tracking-wider font-mono">Piutang (Receivables)</p>
+                  <h3 className="text-xl font-extrabold mt-1">
                     Rp {(totalSales - paidSales).toLocaleString("id-ID")}
                   </h3>
                 </div>
-                <div className="size-10 bg-amber-50 dark:bg-amber-950/20 rounded-xl flex items-center justify-center text-amber-600">
-                  <Clock className="size-5" />
+                <div className="size-9 bg-amber-50 dark:bg-amber-950/20 rounded-lg flex items-center justify-center text-amber-600">
+                  <Clock className="size-4.5" />
                 </div>
               </CardContent>
             </Card>
@@ -146,88 +191,85 @@ export function Invoices() {
                 placeholder="Cari berdasarkan nomor invoice atau pelanggan..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-border/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-foreground"
+                className="w-full pl-10 pr-4 py-2 text-xs bg-slate-50 dark:bg-slate-900 border border-border/60 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary text-foreground"
               />
             </div>
             
             <div className="flex gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
-              {(["ALL", "PAID", "UNPAID", "OVERDUE"] as const).map((status) => (
+              {["ALL", "PAID", "UNPAID", "PARTIAL", "CANCELLED"].map((status) => (
                 <button
                   key={status}
                   onClick={() => setStatusFilter(status)}
                   className={cn(
-                    "px-3 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer",
+                    "px-3 py-1.5 text-[10px] font-bold rounded-xl transition-all cursor-pointer whitespace-nowrap",
                     statusFilter === status 
-                      ? "bg-primary text-primary-foreground shadow-md shadow-primary/10" 
-                      : "bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 text-muted-foreground"
+                      ? "bg-primary text-primary-foreground shadow-sm" 
+                      : "bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 text-muted-foreground"
                   )}
                 >
-                  {status === "ALL" ? "Semua" : status === "PAID" ? "Lunas" : status === "UNPAID" ? "Belum Lunas" : "Jatuh Tempo"}
+                  {status === "ALL" ? "Semua" : status}
                 </button>
               ))}
             </div>
           </div>
 
           {/* Table */}
-          <Card className="border-border/40 shadow-sm rounded-2xl overflow-hidden bg-card">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-slate-50 dark:bg-slate-900/60 border-b border-border/40 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                    <th className="px-6 py-4">Nomor Invoice</th>
-                    <th className="px-6 py-4">Nama Pelanggan</th>
-                    <th className="px-6 py-4">Tanggal Faktur</th>
-                    <th className="px-6 py-4">Jatuh Tempo</th>
-                    <th className="px-6 py-4 text-right">Total Tagihan</th>
-                    <th className="px-6 py-4">Status</th>
-                    <th className="px-6 py-4 text-center">Aksi</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border/40 text-sm text-foreground">
-                  {filteredInvoices.length === 0 ? (
-                    <tr>
-                      <td colSpan={7} className="text-center py-12 text-muted-foreground">
-                        Tidak ada invoice yang ditemukan.
-                      </td>
+          {loading ? (
+            <div className="space-y-2">
+              <Skeleton className="h-10 w-full rounded-xl" />
+              <Skeleton className="h-10 w-full rounded-xl" />
+            </div>
+          ) : filteredInvoices.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground bg-card border border-border/40 rounded-2xl shadow-sm">
+              Tidak ada invoice yang ditemukan.
+            </div>
+          ) : (
+            <div className="bg-card border border-border/40 rounded-2xl shadow-sm overflow-hidden animate-in fade-in duration-200">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-slate-50 dark:bg-slate-900/60 border-b border-border/40 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                      <th className="px-6 py-4">Nomor Invoice</th>
+                      <th className="px-6 py-4">Nama Pelanggan</th>
+                      <th className="px-6 py-4">Tanggal Faktur</th>
+                      <th className="px-6 py-4 text-right">Total Tagihan</th>
+                      <th className="px-6 py-4">Status</th>
+                      <th className="px-6 py-4 text-center w-20">Aksi</th>
                     </tr>
-                  ) : (
-                    filteredInvoices.map((inv) => (
-                      <tr key={inv.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/30 transition-colors">
+                  </thead>
+                  <tbody className="divide-y divide-border/40 text-xs text-foreground">
+                    {filteredInvoices.map((inv) => (
+                      <tr key={inv.id} className="hover:bg-slate-50/20 dark:hover:bg-slate-900/20 transition-colors">
                         <td className="px-6 py-4 font-bold text-foreground">
-                          {inv.invoiceNo}
+                          {inv.number}
                         </td>
-                        <td className="px-6 py-4 font-bold text-foreground">
-                          {inv.customerName}
+                        <td className="px-6 py-4 font-semibold text-foreground">
+                          {inv.customer?.name || "-"}
                         </td>
-                        <td className="px-6 py-4 text-xs font-semibold text-muted-foreground">
-                          {inv.dateCreated}
+                        <td className="px-6 py-4 text-muted-foreground">
+                          {new Date(inv.date).toLocaleDateString("id-ID")}
                         </td>
-                        <td className="px-6 py-4 text-xs font-semibold text-muted-foreground">
-                          {inv.dateDue}
-                        </td>
-                        <td className="px-6 py-4 text-right font-extrabold">
+                        <td className="px-6 py-4 text-right font-bold text-foreground">
                           Rp {inv.totalAmount.toLocaleString("id-ID")}
                         </td>
                         <td className="px-6 py-4">
-                          {getStatusBadge(inv.status)}
+                          {getStatusBadge(inv.paymentStatus)}
                         </td>
-                        <td className="px-6 py-4">
-                          <div className="flex justify-center gap-2">
-                            <button onClick={() => alert(`Membuka Invoice ${inv.invoiceNo} (Slicing/Mock)`)} className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-muted-foreground hover:text-foreground cursor-pointer">
-                              <Eye className="size-4" />
-                            </button>
-                            <button onClick={() => alert(`Mengunduh PDF Invoice ${inv.invoiceNo} (Slicing/Mock)`)} className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-muted-foreground hover:text-foreground cursor-pointer">
-                              <Download className="size-4" />
-                            </button>
-                          </div>
+                        <td className="px-6 py-4 text-center">
+                          <button 
+                            onClick={() => alert(`Detail invoice ${inv.number} bisa dicetak via cetak PDF.`)} 
+                            className="p-1.5 hover:bg-slate-100 rounded-lg text-primary flex items-center justify-center cursor-pointer"
+                          >
+                            <Eye className="size-4" />
+                          </button>
                         </td>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </Card>
+          )}
         </div>
       </main>
     </div>

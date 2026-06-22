@@ -12,5 +12,5 @@
     "resolveJsonModule": true,
     "ignoreDeprecations": "6.0"
   },
-  "include": ["src/**/*", "server.ts", "prisma.config.ts"]
+  "include": ["src/**/*", "server.ts"]
 }
