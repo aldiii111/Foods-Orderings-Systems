@@ -34,7 +34,8 @@ export function ProductList() {
       setLoading(true);
       setError(null);
       const data = await productService.getProducts(search);
-      setProducts(data);
+      const list = Array.isArray(data) ? data : (data as any).products || [];
+      setProducts(list);
     } catch (err: unknown) {
       console.error("Gagal mengambil menu makanan:", err);
       setError("Gagal memuat daftar menu dari server.");
