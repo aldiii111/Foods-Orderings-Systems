@@ -1,57 +1,46 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { 
   Package, 
   Users2, 
-  ArrowUpRight, 
   Layers,
   Sparkles,
   AlertTriangle,
-  Boxes
+  Boxes,
+  FileText,
+  Receipt,
+  DollarSign,
+  TrendingUp,
+  Clock,
+  ArrowRight
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { dashboardService } from "@/services/dashboardService";
-import { productService } from "@/services/productService";
-import type { DashboardData, Product } from "@/types";
+import { erpService } from "@/services/erpService";
+import type { DashboardData } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Dashboard() {
-  const [stats, setStats] = useState<DashboardData | null>(null);
-  const [products, setProducts] = useState<Product[]>([]);
+  const navigate = useNavigate();
+  const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function fetchData() {
+    async function fetchDashboardData() {
       try {
         setLoading(true);
         setError(null);
-        
-        // Fetch dashboard statistics and products list in parallel
-        const [statsData, productsData] = await Promise.all([
-          dashboardService.getDashboard(),
-          productService.getProducts()
-        ]);
-        
-        setStats(statsData);
-        setProducts(productsData);
-      } catch (err: unknown) {
-        console.error("Gagal memuat data dashboard:", err);
-        setError("Gagal memuat data dari server. Harap periksa koneksi Anda.");
+        const stats = await erpService.getDashboard();
+        setData(stats);
+      } catch (err: any) {
+        console.error("Failed to load dashboard:", err);
+        setError("Gagal memuat data dashboard. Silakan periksa koneksi backend.");
       } finally {
         setLoading(false);
       }
     }
-
-    fetchData();
+    fetchDashboardData();
   }, []);
-
-  // Filter low stock items (stock < 10)
-  const lowStockItems = products.filter(p => p.stock < 10);
-
-  // Sort products by id/creation desc to get recent products
-  const recentProducts = [...products]
-    .sort((a, b) => b.id - a.id)
-    .slice(0, 4);
 
   if (error) {
     return (
@@ -75,201 +64,371 @@ export default function Dashboard() {
     );
   }
 
+  // Format Currency
+  const formatIDR = (value: number) => {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      maximumFractionDigits: 0
+    }).format(value);
+  };
+
+  // Find max revenue for chart scaling
+  const maxRevenue = data?.charts?.revenueTrend?.reduce((max, item) => Math.max(max, item.revenue), 1) || 1;
+
   return (
     <div className="flex min-h-screen bg-slate-50/50 dark:bg-background antialiased">
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Header */}
         <header className="h-16 flex items-center justify-between px-8 border-b border-border/40 bg-card/50 backdrop-blur-sm shrink-0">
           <div className="space-y-0.5">
-            <h2 className="text-xl font-bold tracking-tight text-foreground">Dashboard</h2>
-            <p className="text-xs text-muted-foreground font-medium">Selamat datang kembali! Berikut adalah ringkasan hari ini.</p>
+            <h2 className="text-xl font-bold tracking-tight text-foreground">Business Intelligence Dashboard</h2>
+            <p className="text-xs text-muted-foreground font-medium">Ringkasan operasional, analitik penjualan, dan manajemen stok.</p>
           </div>
-          {stats?.quote && !loading && (
-            <div className="hidden md:flex items-center gap-2 max-w-sm px-3 py-1.5 rounded-lg bg-primary/5 text-xs text-primary font-medium italic border border-primary/10">
-              <Sparkles className="size-3.5 shrink-0 animate-pulse" />
-              <span>"{stats.quote}"</span>
-            </div>
-          )}
+          <div className="hidden md:flex items-center gap-2 max-w-sm px-3 py-1.5 rounded-lg bg-primary/5 text-xs text-primary font-medium italic border border-primary/10">
+            <Sparkles className="size-3.5 shrink-0 animate-pulse" />
+            <span>SaaS ERP System Aktif</span>
+          </div>
         </header>
 
         {/* Content */}
         <div className="flex-1 p-8 space-y-6 overflow-y-auto">
-          {/* Quote in mobile */}
-          {stats?.quote && !loading && (
-            <div className="md:hidden flex items-center gap-2 p-3 rounded-lg bg-primary/5 text-xs text-primary font-medium italic border border-primary/10">
-              <Sparkles className="size-3.5 shrink-0" />
-              <span>"{stats.quote}"</span>
-            </div>
-          )}
+          {/* Quick Actions Panel */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <button
+              onClick={() => navigate("/staff/products")}
+              className="flex items-center justify-between p-4 rounded-xl bg-card border border-border/40 hover:border-primary/50 transition-all cursor-pointer group hover:shadow-sm"
+            >
+              <div className="flex items-center gap-3">
+                <div className="size-9 rounded-lg bg-purple-50 dark:bg-purple-950/20 text-purple-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <Package className="size-4.5" />
+                </div>
+                <div className="text-left">
+                  <p className="text-xs font-bold text-foreground">Kelola Produk</p>
+                  <p className="text-[10px] text-muted-foreground">Tambah & Atur Stok</p>
+                </div>
+              </div>
+              <ArrowRight className="size-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
+            </button>
 
-          {/* Cards Stats */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {/* Total Products Card */}
+            <button
+              onClick={() => navigate("/staff/quotations/create")}
+              className="flex items-center justify-between p-4 rounded-xl bg-card border border-border/40 hover:border-primary/50 transition-all cursor-pointer group hover:shadow-sm"
+            >
+              <div className="flex items-center gap-3">
+                <div className="size-9 rounded-lg bg-blue-50 dark:bg-blue-950/20 text-blue-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <FileText className="size-4.5" />
+                </div>
+                <div className="text-left">
+                  <p className="text-xs font-bold text-foreground">Buat Penawaran</p>
+                  <p className="text-[10px] text-muted-foreground">Quotation Baru</p>
+                </div>
+              </div>
+              <ArrowRight className="size-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
+            </button>
+
+            <button
+              onClick={() => navigate("/staff/invoices/create")}
+              className="flex items-center justify-between p-4 rounded-xl bg-card border border-border/40 hover:border-primary/50 transition-all cursor-pointer group hover:shadow-sm"
+            >
+              <div className="flex items-center gap-3">
+                <div className="size-9 rounded-lg bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <Receipt className="size-4.5" />
+                </div>
+                <div className="text-left">
+                  <p className="text-xs font-bold text-foreground">Buat Invoice</p>
+                  <p className="text-[10px] text-muted-foreground">Catat Penjualan</p>
+                </div>
+              </div>
+              <ArrowRight className="size-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
+            </button>
+
+            <button
+              onClick={() => navigate("/staff/customers")}
+              className="flex items-center justify-between p-4 rounded-xl bg-card border border-border/40 hover:border-primary/50 transition-all cursor-pointer group hover:shadow-sm"
+            >
+              <div className="flex items-center gap-3">
+                <div className="size-9 rounded-lg bg-rose-50 dark:bg-rose-950/20 text-rose-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <Users2 className="size-4.5" />
+                </div>
+                <div className="text-left">
+                  <p className="text-xs font-bold text-foreground">Tambah Pelanggan</p>
+                  <p className="text-[10px] text-muted-foreground">CRM Directory</p>
+                </div>
+              </div>
+              <ArrowRight className="size-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
+            </button>
+          </div>
+
+          {/* Cards KPI Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {/* Total Revenue */}
             <Card className="border-border/40 shadow-sm rounded-2xl">
               <CardContent className="p-6 flex justify-between items-center">
-                <div className="space-y-2">
-                  <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Total Produk</p>
+                <div className="space-y-1">
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Total Pendapatan</p>
                   {loading ? (
-                    <Skeleton className="h-8 w-16" />
+                    <Skeleton className="h-7 w-28" />
                   ) : (
-                    <h3 className="text-2xl font-bold text-foreground">{stats?.totalProducts ?? 0}</h3>
+                    <h3 className="text-xl font-extrabold text-foreground">{formatIDR(data?.kpis?.totalRevenue ?? 0)}</h3>
                   )}
+                  <p className="text-[10px] text-emerald-600 flex items-center gap-1 font-semibold">
+                    <TrendingUp className="size-3" />
+                    <span>Lunas Terverifikasi</span>
+                  </p>
                 </div>
-                <div className="flex flex-col items-end gap-2">
-                  <div className="size-10 flex items-center justify-center rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-950/20 dark:text-purple-400">
-                    <Package className="size-5" />
-                  </div>
-                  <div className="flex items-center text-xs font-bold text-emerald-600">
-                    <ArrowUpRight className="size-3" />
-                    +100% API
-                  </div>
+                <div className="size-10 flex items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20 dark:text-emerald-400">
+                  <DollarSign className="size-5" />
                 </div>
               </CardContent>
             </Card>
 
-            {/* Total Stock Card */}
+            {/* Monthly Revenue */}
             <Card className="border-border/40 shadow-sm rounded-2xl">
               <CardContent className="p-6 flex justify-between items-center">
-                <div className="space-y-2">
-                  <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Total Stok</p>
+                <div className="space-y-1">
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Omset Bulan Ini</p>
                   {loading ? (
-                    <Skeleton className="h-8 w-16" />
+                    <Skeleton className="h-7 w-28" />
                   ) : (
-                    <h3 className="text-2xl font-bold text-foreground">{stats?.totalStock ?? 0} porsi</h3>
+                    <h3 className="text-xl font-extrabold text-foreground">{formatIDR(data?.kpis?.monthlyRevenue ?? 0)}</h3>
                   )}
+                  <p className="text-[10px] text-muted-foreground">
+                    Jumlah Transaksi: {data?.kpis?.monthlySales ?? 0}
+                  </p>
                 </div>
-                <div className="flex flex-col items-end gap-2">
-                  <div className="size-10 flex items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/20 dark:text-blue-400">
-                    <Boxes className="size-5" />
-                  </div>
-                  <div className="flex items-center text-xs font-bold text-emerald-600">
-                    <ArrowUpRight className="size-3" />
-                    Aktif
-                  </div>
+                <div className="size-10 flex items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/20 dark:text-blue-400">
+                  <TrendingUp className="size-5" />
                 </div>
               </CardContent>
             </Card>
 
-            {/* Total Customers Card */}
-            <Card className="border-border/40 shadow-sm rounded-2xl sm:col-span-2 lg:col-span-1">
+            {/* Total Products & Stock */}
+            <Card className="border-border/40 shadow-sm rounded-2xl">
               <CardContent className="p-6 flex justify-between items-center">
-                <div className="space-y-2">
-                  <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Total Pelanggan</p>
+                <div className="space-y-1">
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Item & Total Stok</p>
                   {loading ? (
-                    <Skeleton className="h-8 w-16" />
+                    <Skeleton className="h-7 w-24" />
                   ) : (
-                    <h3 className="text-2xl font-bold text-foreground">{stats?.totalCustomers ?? 0}</h3>
+                    <h3 className="text-xl font-extrabold text-foreground">
+                      {data?.kpis?.totalProducts ?? 0} <span className="text-xs text-muted-foreground font-normal">({data?.kpis?.totalStock ?? 0} Unit)</span>
+                    </h3>
                   )}
+                  <p className="text-[10px] text-amber-600 font-semibold flex items-center gap-1">
+                    <AlertTriangle className="size-3" />
+                    <span>{data?.kpis?.lowStockProducts ?? 0} Stok Menipis</span>
+                  </p>
                 </div>
-                <div className="flex flex-col items-end gap-2">
-                  <div className="size-10 flex items-center justify-center rounded-xl bg-rose-50 text-rose-600 dark:bg-rose-950/20 dark:text-rose-400">
-                    <Users2 className="size-5" />
-                  </div>
-                  <div className="text-[10px] font-medium text-muted-foreground">
-                    Role Customer
-                  </div>
+                <div className="size-10 flex items-center justify-center rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-950/20 dark:text-purple-400">
+                  <Package className="size-5" />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Quotations & CRM Stats */}
+            <Card className="border-border/40 shadow-sm rounded-2xl">
+              <CardContent className="p-6 flex justify-between items-center">
+                <div className="space-y-1">
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Penawaran & CRM</p>
+                  {loading ? (
+                    <Skeleton className="h-7 w-24" />
+                  ) : (
+                    <h3 className="text-xl font-extrabold text-foreground">
+                      {data?.kpis?.totalQuotations ?? 0} <span className="text-xs text-muted-foreground font-normal">({data?.kpis?.totalCustomers ?? 0} Pelanggan)</span>
+                    </h3>
+                  )}
+                  <p className="text-[10px] text-blue-600 font-medium">
+                    {data?.kpis?.pendingQuotations ?? 0} Butuh Tindak Lanjut
+                  </p>
+                </div>
+                <div className="size-10 flex items-center justify-center rounded-xl bg-rose-50 text-rose-600 dark:bg-rose-950/20 dark:text-rose-400">
+                  <FileText className="size-5" />
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Activities and Stock Alerts Grid */}
+          {/* Charts Visualizations */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Recent activity */}
-            <div className="lg:col-span-2">
-              <Card className="border-border/40 shadow-sm rounded-2xl h-full">
-                <CardHeader>
-                  <CardTitle className="text-base font-bold flex items-center gap-2">
-                    <Layers className="size-4 text-primary" />
-                    Aktivitas Produk Terbaru
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="divide-y divide-border/40 -mt-2">
-                  {loading ? (
-                    Array.from({ length: 3 }).map((_, i) => (
-                      <div key={i} className="flex justify-between items-center py-4">
-                        <div className="space-y-2 w-1/3">
-                          <Skeleton className="h-4 w-full" />
-                          <Skeleton className="h-3 w-2/3" />
-                        </div>
-                        <Skeleton className="h-5 w-20" />
-                      </div>
-                    ))
-                  ) : recentProducts.length === 0 ? (
-                    <div className="text-center py-8 text-sm text-muted-foreground">
-                      Belum ada produk yang terdaftar.
+            {/* Revenue Trend Line chart alternative using SVG */}
+            <Card className="border-border/40 shadow-sm rounded-2xl lg:col-span-2">
+              <CardHeader>
+                <CardTitle className="text-sm font-bold flex items-center gap-2">
+                  <TrendingUp className="size-4 text-primary" />
+                  Tren Pendapatan Harian (30 Hari Terakhir)
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <Skeleton className="h-48 w-full rounded-lg" />
+                ) : !data?.charts?.revenueTrend || data.charts.revenueTrend.length === 0 ? (
+                  <div className="h-48 flex items-center justify-center text-xs text-muted-foreground">Belum ada transaksi terekam.</div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="h-44 flex items-end gap-1.5 w-full border-b border-l border-border/50 pb-2 pl-2">
+                      {data.charts.revenueTrend.map((item, index) => {
+                        const percent = (item.revenue / maxRevenue) * 100;
+                        return (
+                          <div 
+                            key={index} 
+                            className="flex-1 flex flex-col items-center justify-end h-full group relative"
+                          >
+                            {/* Hover tooltip */}
+                            <div className="absolute bottom-full mb-1 hidden group-hover:block bg-black text-white text-[9px] py-1 px-2 rounded z-20 whitespace-nowrap shadow">
+                              {item.date}: {formatIDR(item.revenue)}
+                            </div>
+                            <div 
+                              style={{ height: `${Math.max(percent, 4)}%` }}
+                              className="w-full bg-gradient-to-t from-primary/60 to-primary rounded-t-sm group-hover:opacity-90 transition-all"
+                            />
+                          </div>
+                        );
+                      })}
                     </div>
-                  ) : (
-                    recentProducts.map((product) => (
-                      <div key={product.id} className="flex items-center justify-between py-4 first:pt-0 last:pb-0">
-                        <div className="space-y-1">
-                          <h4 className="text-sm font-bold text-foreground">{product.name}</h4>
-                          <p className="text-xs text-muted-foreground">
-                            {product.description || "Tidak ada deskripsi"}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-6">
-                          <span className="text-sm font-bold text-foreground">
-                            Rp {product.price.toLocaleString("id-ID")}
-                          </span>
-                          <div className="flex flex-col items-end gap-1 w-24">
-                            <span className="px-2 py-0.5 text-[10px] font-bold rounded-lg border bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-950/20 dark:text-blue-400 dark:border-blue-900/30">
-                              Stok: {product.stock}
-                            </span>
-                            <span className="text-[9px] text-muted-foreground">Baru Ditambahkan</span>
+                    <div className="flex justify-between text-[9px] text-muted-foreground">
+                      <span>30 Hari Lalu</span>
+                      <span>Hari Ini</span>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Category / Stock Distribution */}
+            <Card className="border-border/40 shadow-sm rounded-2xl">
+              <CardHeader>
+                <CardTitle className="text-sm font-bold flex items-center gap-2">
+                  <Boxes className="size-4 text-purple-600" />
+                  Komposisi Kategori
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <div className="space-y-3">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-full" />
+                  </div>
+                ) : !data?.charts?.categoryDistribution || data.charts.categoryDistribution.length === 0 ? (
+                  <div className="h-48 flex items-center justify-center text-xs text-muted-foreground">Kategori kosong</div>
+                ) : (
+                  <div className="space-y-4">
+                    {data.charts.categoryDistribution.slice(0, 4).map((cat, idx) => {
+                      const totalProducts = data.kpis.totalProducts || 1;
+                      const ratio = Math.ceil((cat.productCount / totalProducts) * 100);
+                      return (
+                        <div key={idx} className="space-y-1.5">
+                          <div className="flex justify-between text-xs">
+                            <span className="font-semibold text-foreground">{cat.name}</span>
+                            <span className="text-muted-foreground">{cat.productCount} Item ({ratio}%)</span>
+                          </div>
+                          <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                            <div 
+                              className="h-full bg-primary rounded-full" 
+                              style={{ width: `${ratio}%` }}
+                            />
                           </div>
                         </div>
-                      </div>
-                    ))
-                  )}
-                </CardContent>
-              </Card>
-            </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
 
-            {/* Low Stock Alert */}
-            <Card className="border-border/40 shadow-sm rounded-2xl">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                <CardTitle className="text-base font-bold flex items-center gap-2">
-                  <AlertTriangle className="size-4 text-amber-500" />
-                  Stok Menipis
+          {/* Recent Activity and Low Stock alert lists */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Audit Logs / Activity feed */}
+            <Card className="border-border/40 shadow-sm rounded-2xl lg:col-span-2">
+              <CardHeader>
+                <CardTitle className="text-sm font-bold flex items-center gap-2">
+                  <Clock className="size-4 text-primary animate-pulse" />
+                  Audit Log & Log Aktivitas Terbaru
                 </CardTitle>
-                <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-amber-50 text-amber-700 dark:bg-amber-950/20 dark:text-amber-400">
-                  Stok &lt; 10
-                </span>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <div className="space-y-4">
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-full" />
+                  </div>
+                ) : !data?.recentActivities || data.recentActivities.length === 0 ? (
+                  <div className="text-center py-6 text-xs text-muted-foreground">Belum ada aktivitas terekam.</div>
+                ) : (
+                  <div className="flow-root">
+                    <ul className="-mb-8">
+                      {data.recentActivities.map((act, actIdx) => (
+                        <li key={act.id}>
+                          <div className="relative pb-6">
+                            {actIdx !== data.recentActivities.length - 1 ? (
+                              <span className="absolute top-4 left-4 -ml-px h-full w-0.5 bg-border/40" aria-hidden="true" />
+                            ) : null}
+                            <div className="relative flex space-x-3">
+                              <div>
+                                <span className="h-8 w-8 rounded-full bg-slate-50 dark:bg-slate-900 border border-border/40 flex items-center justify-center">
+                                  <Layers className="size-3.5 text-muted-foreground" />
+                                </span>
+                              </div>
+                              <div className="flex-1 min-w-0 pt-1.5 flex justify-between space-x-4">
+                                <div>
+                                  <p className="text-xs font-semibold text-foreground">
+                                    {act.action.replace(/_/g, " ")}{" "}
+                                    <span className="font-normal text-muted-foreground">
+                                      ({act.details || "-"})
+                                    </span>
+                                  </p>
+                                </div>
+                                <div className="text-right text-[10px] whitespace-nowrap text-muted-foreground shrink-0">
+                                  <time dateTime={act.timestamp}>
+                                    {new Date(act.timestamp).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}
+                                  </time>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Quick Actions / System Health */}
+            <Card className="border-border/40 shadow-sm rounded-2xl">
+              <CardHeader>
+                <CardTitle className="text-sm font-bold flex items-center gap-2">
+                  <AlertTriangle className="size-4 text-amber-500" />
+                  Status Kritis & Stok Menipis
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {loading ? (
-                  Array.from({ length: 3 }).map((_, i) => (
-                    <div key={i} className="p-3.5 border border-border/50 rounded-xl space-y-2">
-                      <Skeleton className="h-4 w-3/4" />
-                      <Skeleton className="h-2 w-full" />
-                    </div>
-                  ))
-                ) : lowStockItems.length === 0 ? (
-                  <div className="text-center py-8 text-sm text-emerald-600 dark:text-emerald-400 font-medium">
-                    Semua stok produk aman!
+                  <div className="space-y-2">
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-full" />
                   </div>
                 ) : (
-                  lowStockItems.map((item) => (
-                    <div key={item.id} className="p-3.5 border border-border/50 rounded-xl bg-white/50 dark:bg-card/30 space-y-2.5">
-                      <div className="flex justify-between items-start">
-                        <div className="min-w-0">
-                          <h4 className="text-sm font-bold text-foreground truncate">{item.name}</h4>
-                          <p className="text-[9px] text-muted-foreground uppercase">ID: PROD-{item.id}</p>
-                        </div>
-                        <div className="text-right shrink-0">
-                          <span className="text-xs font-bold text-rose-600 dark:text-rose-400">Stok: {item.stock}</span>
-                          <p className="text-[10px] text-muted-foreground">Kritis</p>
-                        </div>
+                  <>
+                    <div className="p-4 rounded-xl border border-rose-100 bg-rose-50/30 dark:border-rose-950/20 dark:bg-rose-950/5 flex justify-between items-center">
+                      <div>
+                        <p className="text-xs font-bold text-rose-900 dark:text-rose-400">Total Stok Kritis</p>
+                        <p className="text-[10px] text-muted-foreground">Memerlukan PO Pembelian segera</p>
                       </div>
-                      <div className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-rose-500 rounded-full" 
-                          style={{ width: `${Math.max(item.stock, 0) * 10}%` }}
-                        />
-                      </div>
+                      <span className="text-lg font-black text-rose-700">{data?.kpis?.lowStockProducts ?? 0}</span>
                     </div>
-                  ))
+
+                    <div className="p-4 rounded-xl border border-blue-100 bg-blue-50/30 dark:border-blue-950/20 dark:bg-blue-950/5 flex justify-between items-center">
+                      <div>
+                        <p className="text-xs font-bold text-blue-900 dark:text-blue-400">Penawaran Pending</p>
+                        <p className="text-[10px] text-muted-foreground">Menunggu persetujuan customer</p>
+                      </div>
+                      <span className="text-lg font-black text-blue-700">{data?.kpis?.pendingQuotations ?? 0}</span>
+                    </div>
+                  </>
                 )}
               </CardContent>
             </Card>
