@@ -14,7 +14,8 @@ import {
     History,
     BarChart3,
     Settings,
-    ShieldAlert
+    ShieldAlert,
+    Tags
 } from "lucide-react";
 import {
     Sidebar,
@@ -56,6 +57,7 @@ export function Sidebars() {
             icon: Boxes, 
             subItems: [
                 { name: "Semua Produk", path: "/staff/products", icon: Boxes },
+                { name: "Data Kategori & Unit", path: "/staff/master-data", icon: Tags },
                 { name: "Riwayat Stok", path: "/staff/stock-movements", icon: History },
             ] 
         },

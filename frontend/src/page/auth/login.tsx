@@ -1,5 +1,5 @@
-import { useState, type FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect, type FormEvent } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/context/authContext";
 import { authService } from "@/services/authService";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,17 @@ export function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, isAuthenticated, role } = useAuth();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      if (role === "customer") {
+        navigate("/customer");
+      } else if (role === "staff") {
+        navigate("/staff");
+      }
+    }
+  }, [isAuthenticated, role, navigate]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -104,6 +114,16 @@ export function Login() {
 
             <div className="mt-6 text-center text-sm text-muted-foreground">
               Lupa password? (Fitur Belum Tersedia)
+            </div>
+
+            <div className="mt-2 text-center text-sm text-muted-foreground">
+              Belum punya akun?{" "}
+              <Link
+                to="/choose-role"
+                className="font-medium text-primary underline-offset-4 hover:underline"
+              >
+                Daftar di sini
+              </Link>
             </div>
           </CardContent>
         </Card>
