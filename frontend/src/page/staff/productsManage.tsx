@@ -606,7 +606,6 @@ export function ProductsManage() {
                 <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Nama Produk *</label>
                 <input
                   type="text"
-                  required
                   placeholder="Misal: Nasi Goreng Spesial"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
@@ -645,6 +644,7 @@ export function ProductsManage() {
                     onChange={(e) => setCategoryId(e.target.value)}
                     className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-900 border border-border/60 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary text-foreground"
                   >
+                    <option value="">-- Pilih Kategori --</option>
                     {categories.map(c => (
                       <option key={c.id} value={c.id}>{c.name}</option>
                     ))}
@@ -657,6 +657,7 @@ export function ProductsManage() {
                     onChange={(e) => setUnitId(e.target.value)}
                     className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-900 border border-border/60 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary text-foreground"
                   >
+                    <option value="">-- Pilih Satuan Unit --</option>
                     {units.map(u => (
                       <option key={u.id} value={u.id}>{u.name} ({u.symbol})</option>
                     ))}
