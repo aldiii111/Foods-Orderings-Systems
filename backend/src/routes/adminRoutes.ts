@@ -11,7 +11,6 @@ import {
 
 const router = Router();
 
-// Protect all admin endpoints with ADMIN and SUPER_ADMIN roles
 router.use(authMiddleware as any);
 router.use(rbacMiddleware(["ADMIN", "SUPER_ADMIN"]) as any);
 
