@@ -14,6 +14,7 @@ import { SalesReports } from "@/page/staff/salesReports";
 import { CustomersManage } from "@/page/staff/customers";
 import { UsersManage } from "@/page/staff/users";
 import { Settings } from "@/page/staff/settings";
+import { MasterDataManage } from "@/page/staff/masterDataManage";
 
 import { 
   Bell, 
@@ -284,6 +285,7 @@ export const Staff: React.FC = () => {
           <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="products" element={<ProductsManage />} />
+          <Route path="master-data" element={<MasterDataManage />} />
           <Route path="stock-movements" element={<StockMovements />} />
           <Route path="quotations" element={<Quotations />} />
           <Route path="quotations/create" element={<CreateQuotation />} />

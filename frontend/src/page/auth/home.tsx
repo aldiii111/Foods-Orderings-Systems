@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { UtensilsCrossed, ArrowRight } from "lucide-react";
 
 export function Home() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, role } = useAuth();
 
   return (
     <div className="flex min-h-screen flex-col items-center mt-70 bg-gradient-to-br from-background via-background to-primary/5 px-4">
@@ -21,18 +21,21 @@ export function Home() {
           Sistem pemesanan makanan sederhana untuk mengelola produk dan inventaris kamu.
         </p>
 
-        <div className="mt-7 flex gap-3">
+        <div className="mt-7 flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
           {isAuthenticated ? (
-            <Link to="/login">
-              <Button size="sm">
-                Login
-                <ArrowRight className="size-4" data-icon="inline-end" />
+            <Link to={role === "customer" ? "/customer" : role === "staff" ? "/staff" : "/choose-role"} className="w-full sm:w-auto">
+              <Button size="lg" className="w-full">
+                Ke Dashboard
+                <ArrowRight className="size-4 ml-2" />
               </Button>
             </Link>
           ) : (
             <>
-              <Link to="/choose-role">
+              <Link to="/choose-role" className="w-full sm:w-auto">
                 <Button size="lg" className="w-full">Mulai Sekarang</Button>
+              </Link>
+              <Link to="/login" className="w-full sm:w-auto">
+                <Button size="lg" variant="outline" className="w-full">Login</Button>
               </Link>
             </>
           )}
