@@ -10,7 +10,6 @@ export const rbacMiddleware = (allowedRoles: string[]) => {
         const userRole = req.user.role.toUpperCase();
         const allowedUpper = allowedRoles.map(r => r.toUpperCase());
         
-        // Let's also handle lowercase comparisons (e.g. staff/customer vs STAFF/CUSTOMER)
         if (allowedUpper.includes(userRole) || allowedUpper.includes(req.user.role)) {
             return next();
         }

@@ -73,7 +73,6 @@ export const adjustStock = async (req: CustomRequest, res: Response): Promise<an
 
         await logActivity("ADJUST_STOCK", `Adjusted stock for product ${product.name}. Type: ${type}, Qty: ${quantity}`, req.user?.id);
         
-        // Low Stock Check Notification
         if (afterStock <= product.minStock) {
             await prisma.notification.create({
                 data: {
