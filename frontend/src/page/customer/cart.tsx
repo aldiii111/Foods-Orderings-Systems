@@ -203,7 +203,7 @@ export function Cart() {
                   <div className="space-y-0.5">
                     <h4 className="font-bold text-sm text-foreground truncate">{item.name}</h4>
                     <p className="text-xs text-muted-foreground font-semibold">
-                      Rp {item.price.toLocaleString("id-ID")} / porsi
+                      Rp {Number(item.price ?? 0).toLocaleString("id-ID")} / porsi
                     </p>
                     <span className="inline-block text-[10px] text-muted-foreground">Stok: {item.stock}</span>
                   </div>

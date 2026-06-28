@@ -57,7 +57,8 @@ export function ProductList() {
   }, [debouncedSearch]);
 
   const addToCart = (product: Product) => {
-    if (product.stock <= 0) {
+    const stock = Number(product.stock ?? 0);
+    if (stock <= 0) {
       setNotification({ msg: `Maaf, stok ${product.name} sedang kosong.`, type: "error" });
       return;
     }
@@ -70,7 +71,7 @@ export function ProductList() {
       
       if (existingItemIndex > -1) {
         const currentQty = cart[existingItemIndex].quantity;
-        if (currentQty >= product.stock) {
+        if (currentQty >= stock) {
           setNotification({ msg: `Gagal! Batas stok ${product.name} telah tercapai.`, type: "error" });
           return;
         }
@@ -79,9 +80,9 @@ export function ProductList() {
         cart.push({
           id: product.id,
           name: product.name,
-          price: product.price,
+          price: Number(product.price ?? 0),
           image: product.image,
-          stock: product.stock,
+          stock: stock,
           quantity: 1
         });
       }
@@ -108,9 +109,7 @@ export function ProductList() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
-      {/* Hero Banner Promosi UI/UX Pro Max dengan Wallpaper */}
       <div className="relative overflow-hidden rounded-3xl p-6 sm:p-10 text-white shadow-2xl shadow-primary/20 border border-white/10 group">
-        {/* Wallpaper Image & Dark Gradient Overlay */}
         <div 
           className="absolute inset-0 bg-cover bg-center bg-no-wrap transition-transform duration-1000 ease-out group-hover:scale-105" 
           style={{ backgroundImage: `url('/hero_food_banner.png')` }}
@@ -118,7 +117,6 @@ export function ProductList() {
         <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-900/80 to-transparent sm:to-slate-950/40" />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-primary/20" />
 
-        {/* Abstract background decorative elements */}
         <div className="absolute -right-12 -top-12 size-64 rounded-full bg-secondary/30 blur-3xl pointer-events-none" />
         <div className="absolute right-1/4 -bottom-20 size-80 rounded-full bg-amber-500/20 blur-3xl pointer-events-none" />
 
@@ -146,7 +144,6 @@ export function ProductList() {
         </div>
       </div>
 
-      {/* Control Bar: Search & Info */}
       <div className="flex flex-col sm:flex-row gap-4 items-center justify-between bg-card p-4 sm:p-5 rounded-2xl border border-border/60 shadow-sm backdrop-blur-sm">
         <div className="relative w-full sm:max-w-md">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
@@ -169,7 +166,6 @@ export function ProductList() {
         </div>
       </div>
 
-      {/* Floating Toast Notification */}
       {notification && (
         <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-4 py-3.5 bg-slate-900/95 text-white rounded-2xl shadow-2xl backdrop-blur-md border border-slate-700/50 animate-in fade-in slide-in-from-bottom-5 duration-300">
           {notification.type === "error" ? (
@@ -185,7 +181,6 @@ export function ProductList() {
         </div>
       )}
 
-      {/* Connection Error State */}
       {error && (
         <Card className="border-destructive/30 bg-destructive/5 text-destructive p-5 rounded-2xl flex items-center gap-3 shadow-xs">
           <AlertTriangle className="size-5 shrink-0" />
@@ -193,7 +188,6 @@ export function ProductList() {
         </Card>
       )}
 
-      {/* Menu Product Grid */}
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {Array.from({ length: 8 }).map((_, idx) => (
@@ -230,7 +224,6 @@ export function ProductList() {
               className="border-border/50 shadow-xs hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300 rounded-2xl overflow-hidden bg-card flex flex-col justify-between group"
             >
               <div>
-                {/* Image & Badges Container */}
                 <div className="aspect-4/3 w-full bg-muted relative overflow-hidden flex items-center justify-center">
                   {product.image ? (
                     <img
@@ -247,14 +240,13 @@ export function ProductList() {
 
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
                   
-                  {/* Stock Status Overlay / Badges */}
-                  {product.stock <= 0 ? (
+                  {Number(product.stock ?? 0) <= 0 ? (
                     <div className="absolute inset-0 bg-black/70 backdrop-blur-xs flex items-center justify-center">
                       <Badge variant="destructive" className="px-3 py-1 font-black text-xs uppercase tracking-wider rounded-xl">
                         Stok Habis
                       </Badge>
                     </div>
-                  ) : product.stock < 10 ? (
+                  ) : Number(product.stock ?? 0) < 10 ? (
                     <Badge variant="secondary" className="absolute top-3 left-3 px-2.5 py-0.5 text-[10px] font-black bg-amber-500 text-white rounded-lg uppercase tracking-wider shadow-sm">
                       Sisa {product.stock} Porsi
                     </Badge>
@@ -265,7 +257,6 @@ export function ProductList() {
                   )}
                 </div>
 
-                {/* Content Details */}
                 <div className="p-4 space-y-1.5">
                   <h3 className="font-extrabold text-base text-foreground line-clamp-1 group-hover:text-primary transition-colors">
                     {product.name}
@@ -276,19 +267,18 @@ export function ProductList() {
                 </div>
               </div>
 
-              {/* Action Bar */}
               <div className="p-4 pt-0 mt-2">
                 <div className="flex items-center justify-between border-t border-border/40 pt-3">
                   <div className="flex flex-col">
                     <span className="text-[10px] text-muted-foreground font-semibold uppercase">Harga</span>
                     <span className="text-base font-black text-foreground">
-                      Rp {product.price.toLocaleString("id-ID")}
+                      Rp {Number(product.price ?? 0).toLocaleString("id-ID")}
                     </span>
                   </div>
                   
                   <Button
                     onClick={() => addToCart(product)}
-                    disabled={product.stock <= 0}
+                    disabled={Number(product.stock ?? 0) <= 0}
                     size="sm"
                     className="rounded-xl font-bold text-xs shadow-md shadow-primary/20 cursor-pointer transition-all active:scale-95"
                   >
