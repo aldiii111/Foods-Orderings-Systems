@@ -177,7 +177,7 @@ export const updateProduct = async (req: CustomRequest, res: Response): Promise<
             return res.status(404).json({ message: "Product not found" });
         }
 
-        // Handle stock discrepancy as an ADJUSTMENT if it changes here directly
+    
         if (stock !== undefined && Number(stock) !== currentProduct.stock) {
             const beforeStock = currentProduct.stock;
             const afterStock = Number(stock);
