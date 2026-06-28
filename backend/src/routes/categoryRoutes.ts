@@ -1,4 +1,3 @@
-// Category Routes
 import { Router } from "express";
 import authMiddleware from "../middleware/authMiddleware";
 import { getCategories, createCategory, updateCategory, deleteCategory, reorderCategories } from "../controllers/categoryController";
