@@ -20,8 +20,32 @@ const adminRoutes_1 = __importDefault(require("./src/routes/adminRoutes"));
 const notificationRoutes_1 = __importDefault(require("./src/routes/notificationRoutes"));
 const settingRoutes_1 = __importDefault(require("./src/routes/settingRoutes"));
 const app = (0, express_1.default)();
-app.use((0, cors_1.default)());
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(",")
+    : [
+        "https://foods-orderings-systems.vercel.app",
+        "http://localhost:5173",
+        "http://localhost:3000"
+    ];
+app.use((0, cors_1.default)({
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        }
+        else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
+    credentials: true
+}));
 app.use(express_1.default.json());
+app.use((req, res, next) => {
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("X-Frame-Options", "DENY");
+    res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+    res.setHeader("Content-Security-Policy", "default-src 'self'");
+    next();
+});
 app.use((req, res, next) => {
     console.log(req.method, req.url);
     next();

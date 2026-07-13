@@ -19,8 +19,35 @@ import settingRoutes from "./src/routes/settingRoutes";
 
 const app = express();
 
-app.use(cors());
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(",")
+    : [
+        "https://foods-orderings-systems.vercel.app",
+        "http://localhost:5173",
+        "http://localhost:3000"
+      ];
+
+app.use(
+    cors({
+        origin: (origin, callback) => {
+            if (!origin || allowedOrigins.includes(origin)) {
+                callback(null, true);
+            } else {
+                callback(new Error("Not allowed by CORS"));
+            }
+        },
+        credentials: true
+    })
+);
 app.use(express.json());
+
+app.use((req: Request, res: Response, next: NextFunction) => {
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("X-Frame-Options", "DENY");
+    res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+    res.setHeader("Content-Security-Policy", "default-src 'self'");
+    next();
+});
 
 app.use((req: Request, res: Response, next: NextFunction) => {
     console.log(req.method, req.url);
