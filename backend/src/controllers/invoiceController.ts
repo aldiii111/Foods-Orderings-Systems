@@ -59,7 +59,6 @@ export const createInvoice = async (req: CustomRequest, res: Response): Promise<
             return res.status(400).json({ message: "Customer and products are required" });
         }
 
-        // Subtotal calculation
         let subtotal = 0;
         for (const item of products) {
             const itemPrice = Number(item.price) || 0;
@@ -67,7 +66,6 @@ export const createInvoice = async (req: CustomRequest, res: Response): Promise<
             const itemDisc = Number(item.discount) || 0;
             subtotal += (itemPrice - itemDisc) * qty;
 
-            // Deduct stock for products
             await prisma.product.update({
                 where: { id: Number(item.productId) },
                 data: {
@@ -75,7 +73,6 @@ export const createInvoice = async (req: CustomRequest, res: Response): Promise<
                 }
             });
 
-            // Stock log
             const product = await prisma.product.findUnique({ where: { id: Number(item.productId) } });
             if (product) {
                 await prisma.stockMovement.create({
@@ -106,7 +103,6 @@ export const createInvoice = async (req: CustomRequest, res: Response): Promise<
         const taxRate = Number(tax) || 0;
         const totalAmount = (subtotal - discAmount) * (1 + taxRate / 100);
 
-        // Generate Invoice Number
         const count = await prisma.invoice.count();
         const number = `INV-${Date.now().toString().slice(-4)}-${(count + 1).toString().padStart(4, "0")}`;
 
@@ -125,7 +121,6 @@ export const createInvoice = async (req: CustomRequest, res: Response): Promise<
             include: { customer: true }
         });
 
-        // Update customer total purchases and total invoices count
         const incrementPurchases = paymentStatus === "PAID" ? totalAmount : 0;
         await prisma.customer.update({
             where: { id: Number(customerId) },
@@ -169,7 +164,6 @@ export const updateInvoicePaymentStatus = async (req: CustomRequest, res: Respon
             include: { customer: true }
         });
 
-        // If status changed to PAID, add to customer purchases
         if (paymentStatus === "PAID" && currentInvoice.paymentStatus !== "PAID") {
             await prisma.customer.update({
                 where: { id: currentInvoice.customerId },

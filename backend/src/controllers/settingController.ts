@@ -11,7 +11,6 @@ export const getSettings = async (req: Request, res: Response): Promise<any> => 
             settings[s.key] = s.value;
         });
 
-        // Set defaults if empty
         const defaults: Record<string, string> = {
             companyName: "FoodOrder ERP",
             companyEmail: "info@foodorder.com",
