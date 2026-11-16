@@ -43,6 +43,9 @@ app.use("/api/notifications", notificationRoutes_1.default);
 app.use("/api/settings", settingRoutes_1.default);
 app.use("/uploads", express_1.default.static("uploads"));
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-    console.log(`Server berjalan di port ${PORT}`);
-});
+if (process.env.NODE_ENV !== "test") {
+    app.listen(PORT, () => {
+        console.log(`Server berjalan di port ${PORT}`);
+    });
+}
+exports.default = app;
