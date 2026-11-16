@@ -52,7 +52,6 @@ const createQuotation = async (req, res) => {
         if (!customerId || !products || products.length === 0) {
             return res.status(400).json({ message: "Customer and products are required" });
         }
-        // Auto calculation
         let subtotal = 0;
         for (const item of products) {
             const itemPrice = Number(item.price) || 0;
@@ -63,7 +62,6 @@ const createQuotation = async (req, res) => {
         const discAmount = Number(discount) || 0;
         const taxRate = Number(tax) || 0;
         const totalAmount = (subtotal - discAmount) * (1 + taxRate / 100);
-        // Generate Quotation Number
         const count = await prisma_1.default.quotation.count();
         const number = `QT-${Date.now().toString().slice(-4)}-${(count + 1).toString().padStart(4, "0")}`;
         const quotation = await prisma_1.default.quotation.create({
@@ -82,7 +80,6 @@ const createQuotation = async (req, res) => {
             },
             include: { customer: true }
         });
-        // Update customer total quotations count
         await prisma_1.default.customer.update({
             where: { id: Number(customerId) },
             data: {
@@ -105,7 +102,6 @@ const updateQuotation = async (req, res) => {
         if (!currentQuotation) {
             return res.status(404).json({ message: "Quotation not found" });
         }
-        // Recalculate
         let totalAmount = currentQuotation.totalAmount;
         if (products) {
             let subtotal = 0;
@@ -190,7 +186,6 @@ const convertToInvoice = async (req, res) => {
         if (!quotation) {
             return res.status(404).json({ message: "Quotation not found" });
         }
-        // Generate Invoice Number
         const count = await prisma_1.default.invoice.count();
         const invoiceNumber = `INV-${Date.now().toString().slice(-4)}-${(count + 1).toString().padStart(4, "0")}`;
         const invoice = await prisma_1.default.invoice.create({
@@ -205,12 +200,10 @@ const convertToInvoice = async (req, res) => {
                 products: quotation.products || []
             }
         });
-        // Update quotation status
         await prisma_1.default.quotation.update({
             where: { id },
             data: { status: "ACCEPTED" }
         });
-        // Update Customer invoices count & purchases count
         await prisma_1.default.customer.update({
             where: { id: quotation.customerId },
             data: {

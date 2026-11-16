@@ -70,7 +70,6 @@ const adjustStock = async (req, res) => {
             })
         ]);
         await (0, audit_1.logActivity)("ADJUST_STOCK", `Adjusted stock for product ${product.name}. Type: ${type}, Qty: ${quantity}`, req.user?.id);
-        // Low Stock Check Notification
         if (afterStock <= product.minStock) {
             await prisma_1.default.notification.create({
                 data: {

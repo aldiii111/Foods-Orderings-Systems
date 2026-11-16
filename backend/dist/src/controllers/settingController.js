@@ -13,7 +13,6 @@ const getSettings = async (req, res) => {
         dbSettings.forEach(s => {
             settings[s.key] = s.value;
         });
-        // Set defaults if empty
         const defaults = {
             companyName: "FoodOrder ERP",
             companyEmail: "info@foodorder.com",

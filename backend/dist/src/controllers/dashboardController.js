@@ -7,7 +7,6 @@ exports.getDashboard = void 0;
 const prisma_1 = __importDefault(require("../lib/prisma"));
 const getDashboard = async (req, res) => {
     try {
-        // KPI counts
         const totalProducts = await prisma_1.default.product.count();
         const stockSum = await prisma_1.default.product.aggregate({
             _sum: { stock: true }
@@ -16,13 +15,11 @@ const getDashboard = async (req, res) => {
         const totalCustomers = await prisma_1.default.customer.count();
         const totalQuotations = await prisma_1.default.quotation.count();
         const totalInvoices = await prisma_1.default.invoice.count();
-        // Total Paid Invoices (Revenue)
         const revenueAgg = await prisma_1.default.invoice.aggregate({
             where: { paymentStatus: "PAID" },
             _sum: { totalAmount: true }
         });
         const totalRevenue = revenueAgg._sum.totalAmount || 0;
-        // Current Month Revenue
         const startOfMonth = new Date();
         startOfMonth.setDate(1);
         startOfMonth.setHours(0, 0, 0, 0);
@@ -34,30 +31,25 @@ const getDashboard = async (req, res) => {
             _sum: { totalAmount: true }
         });
         const monthlyRevenue = monthlyRevAgg._sum.totalAmount || 0;
-        // Monthly Sales Count
         const monthlySales = await prisma_1.default.invoice.count({
             where: {
                 date: { gte: startOfMonth }
             }
         });
-        // Low stock count
         const lowStockProducts = await prisma_1.default.product.count({
             where: {
                 stock: { lte: prisma_1.default.product.fields.minStock }
             }
         });
-        // Pending quotations count
         const pendingQuotations = await prisma_1.default.quotation.count({
             where: { status: "PENDING" }
         });
-        // Recent activities from audit logs (fall back to recent products if audit logs empty)
         let recentActivities = await prisma_1.default.auditLog.findMany({
             orderBy: { timestamp: "desc" },
             take: 7,
             include: { user: { select: { name: true } } }
         });
         if (recentActivities.length === 0) {
-            // Seed a default activity or fetch products/invoices
             const recentInvs = await prisma_1.default.invoice.findMany({
                 orderBy: { date: "desc" },
                 take: 5,
@@ -72,8 +64,6 @@ const getDashboard = async (req, res) => {
                 timestamp: inv.date
             }));
         }
-        // Charts data preparation
-        // 1. Revenue Trends (Grouped by date for past 30 days)
         const past30Days = new Date();
         past30Days.setDate(past30Days.getDate() - 30);
         const invoicesPast30Days = await prisma_1.default.invoice.findMany({
@@ -83,7 +73,6 @@ const getDashboard = async (req, res) => {
             },
             select: { date: true, totalAmount: true }
         });
-        // Map to daily totals
         const dailyTrendsMap = {};
         for (let i = 0; i < 30; i++) {
             const d = new Date();
@@ -102,7 +91,6 @@ const getDashboard = async (req, res) => {
             date,
             revenue: dailyTrendsMap[date]
         }));
-        // 2. Category Distribution
         const categories = await prisma_1.default.category.findMany({
             include: {
                 products: {
@@ -115,7 +103,6 @@ const getDashboard = async (req, res) => {
             productCount: cat.products.length,
             stockCount: cat.products.reduce((acc, p) => acc + p.stock, 0)
         }));
-        // 3. Stock Distribution (High, Normal, Low Stock brackets)
         const allProducts = await prisma_1.default.product.findMany();
         let low = 0, normal = 0, high = 0;
         allProducts.forEach(p => {
@@ -131,7 +118,6 @@ const getDashboard = async (req, res) => {
             { name: "Normal Stock", value: normal },
             { name: "High Stock", value: high }
         ];
-        // 4. Customer Growth (Past 6 months count)
         const customerGrowth = [
             { month: "Jan", count: Math.ceil(totalCustomers * 0.4) },
             { month: "Feb", count: Math.ceil(totalCustomers * 0.5) },

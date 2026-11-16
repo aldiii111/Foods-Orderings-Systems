@@ -8,7 +8,6 @@ const authMiddleware_1 = __importDefault(require("../middleware/authMiddleware")
 const rbacMiddleware_1 = require("../middleware/rbacMiddleware");
 const adminController_1 = require("../controllers/adminController");
 const router = (0, express_1.Router)();
-// Protect all admin endpoints with ADMIN and SUPER_ADMIN roles
 router.use(authMiddleware_1.default);
 router.use((0, rbacMiddleware_1.rbacMiddleware)(["ADMIN", "SUPER_ADMIN"]));
 router.get("/users", adminController_1.getUsers);

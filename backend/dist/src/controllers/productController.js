@@ -11,10 +11,8 @@ const getProducts = async (req, res) => {
         const search = req.query.search || "";
         const categoryId = req.query.categoryId ? Number(req.query.categoryId) : undefined;
         const status = req.query.status || undefined;
-        // Sorting
         const sortBy = req.query.sortBy || "createdAt";
         const order = req.query.order === "asc" ? "asc" : "desc";
-        // Pagination
         const page = Number(req.query.page) || 1;
         const limit = Number(req.query.limit) || 10;
         const skip = (page - 1) * limit;
@@ -85,7 +83,6 @@ const createProduct = async (req, res) => {
                 unit: true
             }
         });
-        // Log initial stock movement if stock > 0
         if (stock && Number(stock) > 0) {
             await prisma_1.default.stockMovement.create({
                 data: {
@@ -142,7 +139,6 @@ const updateProduct = async (req, res) => {
         if (!currentProduct) {
             return res.status(404).json({ message: "Product not found" });
         }
-        // Handle stock discrepancy as an ADJUSTMENT if it changes here directly
         if (stock !== undefined && Number(stock) !== currentProduct.stock) {
             const beforeStock = currentProduct.stock;
             const afterStock = Number(stock);
@@ -242,7 +238,6 @@ const importProducts = async (req, res) => {
         }
         const createdProducts = [];
         for (const item of products) {
-            // Find category and unit by name or create if needed
             let categoryId = null;
             if (item.category) {
                 const cat = await prisma_1.default.category.upsert({
