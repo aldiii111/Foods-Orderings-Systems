@@ -1,187 +1,273 @@
 # Food Ordering & Operations System
 
-Sistem manajemen restoran dan pemesanan makanan full-stack yang mengintegrasikan portal pemesanan pelanggan dengan sistem operasional back-office (kasir, inventaris stok, penawaran harga, dan penagihan faktur).
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+![React](https://img.shields.io/badge/React_19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
+![Express.js](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
+![Prisma](https://img.shields.io/badge/Prisma_ORM-2D3748?style=for-the-badge&logo=prisma&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS_v4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![Nginx](https://img.shields.io/badge/Nginx-009639?style=for-the-badge&logo=nginx&logoColor=white)
+
+Sistem full-stack manajemen pemesanan makanan dan operasional bisnis F&B (*Food & Beverage*). Aplikasi ini mengintegrasikan portal pemesanan mandiri untuk pelanggan (*customer-facing*) dengan dashboard ERP mini untuk staf dan manajemen (pengendalian stok, penerbitan surat penawaran, serta penagihan faktur).
 
 ---
 
-## Tentang Sistem
+## Daftar Isi
+- [Latar Belakang & Solusi](#latar-belakang--solusi)
+- [Fitur Utama](#fitur-utama)
+- [Sorotan Teknis (Engineering Highlights)](#sorotan-teknis-engineering-highlights)
+- [Arsitektur Sistem](#arsitektur-sistem)
+- [Skema Basis Data](#skema-basis-data)
+- [Panduan Menjalankan](#panduan-menjalankan)
+  - [Opsi 1: Docker Compose (Disarankan)](#opsi-1-docker-compose-disarankan)
+  - [Opsi 2: Manual (Local Development)](#opsi-2-manual-local-development)
+- [Akun Demo Pengujian](#akun-demo-pengujian)
+- [Dokumentasi API](#dokumentasi-api)
+- [Struktur Direktori](#struktur-direktori)
+- [Standar Alur Kerja](#standar-alur-kerja)
 
-Pada bisnis food & beverage (F&B), pencatatan pesanan sering kali terputus dari manajemen persediaan bahan baku dan administrasi penagihan. Sistem ini dibangun untuk mengatasi kendala tersebut dengan menghubungkan seluruh siklus operasional dalam satu platform: mulai dari etalase menu yang dilihat pelanggan, pelacakan mutasi persediaan di dapur/gudang, hingga penerbitan dokumen komersial (*quotation* dan *invoice*).
+---
 
-Aplikasi memisahkan alur kerja ke dalam dua antarmuka utama:
+## Latar Belakang & Solusi
+
+Pada operasional bisnis makanan dan katering skala menengah, pencatatan transaksi kasir sering kali terisolasi dari pencatatan persediaan bahan/menu dan pembuatan faktur tagihan pelanggan. Hal ini berisiko menimbulkan *over-selling*, selisih stok fisik (*shrinkage*), dan keterlambatan penagihan piutang.
+
+Proyek ini dibangun sebagai solusi terpadu dengan menghubungkan tiga pilar operasional:
+1. **Transaksional Pelanggan**: Pemesanan langsung melalui katalog interaktif dengan kalkulasi otomatis.
+2. **Kontrol Persediaan Real-Time**: Mutasi stok otomatis tercatat setiap kali terjadi penyesuaian atau penjualan, dilengkapi kalkulasi HPP (*Cost Price*) terhadap harga jual.
+3. **Siklus Finansial**: Alur dokumen formal dari *Quotation* (penawaran harga untuk pesanan partai besar) hingga penerbitan *Invoice* dan pelacakan termin pembayaran.
+
+---
+
+## Fitur Utama
 
 ### 1. Portal Pelanggan (Customer Facing)
-- **Katalog Menu Dinamis**: Menampilkan menu makanan dan minuman dengan filter kategori dan pencarian instan.
-- **Keranjang & Checkout**: Kalkulasi item pesanan dan pengiriman order secara real-time.
-- **Riwayat Transaksi**: Pemantauan status pemesanan pelanggan yang terdaftar.
+- **Katalog Menu Interaktif**: Pencarian menu berdasarkan kata kunci dan filter kategori secara responsif.
+- **Keranjang Belanja (*Shopping Cart*)**: Kalkulasi kuantitas, harga, dan subtotal dinamis berbasis *local state*.
+- **Checkout & Riwayat Pesanan**: Pengiriman pesanan dan pemantauan riwayat status pemesanan pelanggan.
 
 ### 2. Dashboard Operasional (Staff & Admin)
-- **Manajemen Inventaris & Mutasi Stok**:
-  - Pelacakan stok masuk (*in*), keluar (*out*), dan penyesuaian (*adjustment*).
-  - Peringatan dini ketika persediaan mendekati batas minimum (*low stock alert*).
-  - Kalkulasi margin keuntungan berbasis HPP (*cost price*) dan harga jual (*selling price*).
-- **Billing & Dokumen Finansial**:
-  - Pembuatan dan konversi *Quotation* (penawaran harga) untuk pesanan katering atau partai besar.
-  - Penerbitan *Invoice* dan pencatatan riwayat pelunasan tagihan (*unpaid*, *partial*, *paid*).
-- **Master Data**:
-  - Manajemen kategori menu, satuan unit (porsi, pcs, cup, botol), dan data kontak pelanggan.
-- **Keamanan & Kontrol Akses (RBAC)**:
-  - Pembatasan menu dan aksi berdasarkan hak akses staf (`SUPER_ADMIN`, `ADMIN`, `STAFF`, dan `customer`).
-  - Pencatatan log aktivitas sistem (*audit log*).
+- **Ringkasan Penjualan & Notifikasi**: Pemantauan metrik penjualan, grafik performa, dan peringatan dini stok menipis (*low stock alert*).
+- **Manajemen Mutasi Stok**: Pencatatan riwayat stok masuk (*in*), stok keluar (*out*), dan *adjustment* opname lengkap dengan riwayat user penanggung jawab.
+- **Komersial & Penagihan (Quotation & Invoice)**:
+  - Pembuatan dokumen penawaran harga (*quotations*) dengan diskon dan pajak.
+  - Pembuatan faktur (*invoices*) dengan status pembayaran (*unpaid*, *partial*, *paid*).
+- **Master Data**: Pengelolaan data produk (harga modal, harga jual, barcode, SKU), satuan unit (*pcs*, *porsi*, *cup*), kategori, dan direktori pelanggan.
+- **Role-Based Access Control (RBAC)**: Proteksi rute navigasi dan endpoint berdasarkan hak akses user (`SUPER_ADMIN`, `ADMIN`, `STAFF`, `customer`).
 
 ---
 
-## Arsitektur & Desain Sistem
+## Sorotan Teknis (Engineering Highlights)
 
-Aplikasi ini menggunakan arsitektur *decoupled* untuk menjaga modularitas antara antarmuka pengguna dan logika bisnis:
+- **End-to-End Type Safety**: Menggunakan TypeScript secara ketat di frontend dan backend dengan Prisma Client untuk menghasilkan tipe skema database yang sinkron otomatis.
+- **Decoupled Architecture**: Pemisahan jelas antara Express REST API dan React SPA, memungkinkan skalabilitas independen dan kemudahan integrasi dengan platform lain (seperti mobile app atau mesin POS).
+- **Optimized Frontend Performance**: Dibangun menggunakan Vite 8, React 19, TailwindCSS v4, serta komponen headless Radix UI / ShadCN untuk performa rendering dan aksesibilitas maksimal.
+- **Production-Ready Containerization**: 
+  - Docker multi-stage build untuk memperkecil ukuran image frontend dan backend.
+  - Nginx Alpine sebagai *reverse proxy* dan penanganan *client-side SPA fallback routing* (mencegah error 404 saat *hard refresh*).
+  - Skrip startup otomatis (`docker-entrypoint.sh`) yang menyinkronkan skema database (`prisma db push`) dan menjalankan *data seeder* saat pertama kali dinyalakan.
+
+---
+
+## Arsitektur Sistem
+
+Alur interaksi komponen dalam ekosistem aplikasi:
 
 ```
-┌─────────────────────────────────┐
-│     Client Browser              │
-└────────────────┬────────────────┘
-                 │ Port 5173 (Host)
-                 ▼
-┌─────────────────────────────────┐
-│   Frontend (Nginx + React 19)   │
-│   - React Router SPA Fallback   │
-│   - Reverse Proxy:              │
-│       /api/    -> Backend       │
-│       /uploads -> Backend       │
-└────────────────┬────────────────┘
-                 │ HTTP (Port 5000 internal)
-                 ▼
-┌─────────────────────────────────┐
-│   Backend (Express v5 + TS)     │
-│   - Autentikasi JWT & Role RBAC │
-│   - Validasi & REST Controller  │
-│   - File Upload (Multer)        │
-└────────────────┬────────────────┘
-                 │ TCP (Port 5432 internal)
-                 ▼
-┌─────────────────────────────────┐
-│   Database (PostgreSQL 16)      │
-│   - Skema Relasional Prisma ORM │
-│   - Volume Data Persisten       │
-└─────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                       Client Browser                        │
+└──────────────────────────────┬──────────────────────────────┘
+                               │ HTTP Request (Port 5173)
+                               ▼
+┌─────────────────────────────────────────────────────────────┐
+│                 Frontend Container (Nginx)                  │
+│  - Static Asset Delivery (Vite React Build)                 │
+│  - Client Routing Fallback (try_files -> index.html)        │
+│  - Reverse Proxy:                                           │
+│      location /api/    --> http://backend:5000/api/         │
+│      location /uploads --> http://backend:5000/uploads/     │
+└──────────────────────────────┬──────────────────────────────┘
+                               │ Internal Network
+                               ▼
+┌─────────────────────────────────────────────────────────────┐
+│                 Backend Container (Node.js)                 │
+│  - Express.js v5 REST API Framework                         │
+│  - JWT Verification & Role-Based Guard (RBAC)               │
+│  - Controller Logic, Upload Handler (Multer)                │
+└──────────────────────────────┬──────────────────────────────┘
+                               │ Prisma Engine / TCP Port 5432
+                               ▼
+┌─────────────────────────────────────────────────────────────┐
+│                Database Container (PostgreSQL)              │
+│  - Relational Storage Engine (Tables, Indexes, Constraints) │
+│  - Persistent Docker Volume (postgres_data)                 │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-### Stack Teknologi
-- **Frontend**: React 19, TypeScript, Vite, TailwindCSS v4, React Router v7, ShadCN UI / Radix primitives, Axios.
-- **Backend**: Express.js v5, TypeScript, Prisma ORM, JSON Web Token (JWT), bcryptjs, Multer.
-- **Database & Infrastruktur**: PostgreSQL 16, Docker & Docker Compose, Nginx Alpine.
+---
+
+## Skema Basis Data
+
+Struktur relasi data utama yang dimodelkan pada Prisma ORM:
+
+```
+┌──────────────┐          ┌──────────────┐          ┌──────────────┐
+│   Category   │ 1      * │   Product    │ *      1 │     Unit     │
+│──────────────│──────────│──────────────│──────────│──────────────│
+│ id (PK)      │          │ id (PK)      │          │ id (PK)      │
+│ name         │          │ name         │          │ name         │
+│ order        │          │ sku, barcode │          │ symbol       │
+└──────────────┘          │ costPrice    │          └──────────────┘
+                          │ sellingPrice │
+                          │ stock        │
+                          └──────┬───────┘
+                                 │ 1
+                                 │ *
+                          ┌──────┴───────┐          ┌──────────────┐
+                          │StockMovement │ *      1 │     User     │
+                          │──────────────│──────────│──────────────│
+                          │ id (PK)      │          │ id (PK)      │
+                          │ type         │          │ name, email  │
+                          │ quantity     │          │ password     │
+                          │ before/after │          │ role, status │
+                          └──────────────┘          └──────┬───────┘
+                                                           │ 1
+                                                           │ *
+┌──────────────┐ 1      * ┌──────────────┐          ┌──────┴───────┐
+│   Customer   │──────────│  Quotation   │          │   AuditLog   │
+│──────────────│          │──────────────│          │──────────────│
+│ id (PK)      │          │ id (PK)      │          │ id (PK)      │
+│ name, email  │          │ number (UQ)  │          │ action       │
+│ phone        │          │ totalAmount  │          │ timestamp    │
+│ address      │ 1      * │ productsJson │          └──────────────┘
+│──────────────│──────────│──────────────│
+│ totalOrders  │          │   Invoice    │
+└──────────────┘          │──────────────│
+                          │ id (PK)      │
+                          │ number (UQ)  │
+                          │ paymentStatus│
+                          └──────────────┘
+```
 
 ---
 
 ## Panduan Menjalankan
 
-Aplikasi dapat dijalankan secara instan menggunakan Docker (disarankan), atau dijalankan secara manual pada lingkungan lokal.
+### Opsi 1: Docker Compose (Disarankan)
 
-### Opsi 1: Menjalankan Menggunakan Docker (Instan)
+Menjalankan seluruh ekosistem (PostgreSQL, Backend API, Frontend, dan Nginx) hanya dengan satu instruksi:
 
-Metode ini otomatis menyiapkan container database PostgreSQL, sinkronisasi skema tabel, pemuatan data awal (*seeding*), serta menjalankan backend dan frontend.
+```bash
+# Clone repository
+git clone https://github.com/aldiii111/Foods-Orderings-Systems.git
+cd Foods-Orderings-Systems
 
-1. **Jalankan seluruh service:**
-   ```bash
-   docker compose up --build -d
-   ```
+# Jalankan seluruh stack
+docker compose up --build -d
+```
 
-2. **Akses URL aplikasi:**
-   - **Frontend**: [http://localhost:5173](http://localhost:5173)
-   - **Backend API**: [http://localhost:5000](http://localhost:5000)
-   - **PostgreSQL**: `localhost:5432` (`user: postgres`, `password: postgres`, `db: food_ordering`)
+Aplikasi ready diakses melalui:
+- **Frontend**: [http://localhost:5173](http://localhost:5173)
+- **Backend API**: [http://localhost:5000](http://localhost:5000)
+- **PostgreSQL**: `localhost:5432` (`user: postgres`, `password: postgres`, `database: food_ordering`)
 
-3. **Perintah manajemen container:**
-   ```bash
-   # Melihat status log service
-   docker compose logs -f
+**Perintah Pengelolaan Container:**
+```bash
+# Memeriksa log aktivitas
+docker compose logs -f
 
-   # Menghentikan service
-   docker compose down
+# Menghentikan layanan
+docker compose down
 
-   # Reset total database & volume
-   docker compose down -v
-   ```
+# Menghentikan dan menghapus seluruh volume basis data
+docker compose down -v
+```
 
 ---
 
-### Opsi 2: Menjalankan Secara Manual (Local Development)
+### Opsi 2: Manual (Local Development)
 
-Gunakan opsi ini jika ingin mengembangkan fitur tanpa perantara container.
+Jika ingin melakukan pengembangan lokal tanpa menggunakan container:
 
-**Prasyarat:**
-- Node.js v18 atau versi lebih baru
-- PostgreSQL aktif pada port `5432`
+**Prasyarat Lingkungan:**
+- Node.js v18+ dan npm
+- PostgreSQL v15+ berjalan lokal di port `5432`
 
 #### 1. Setup Backend
 ```bash
 cd backend
 
-# Buat file environment dari template
+# Salin template environment
 cp .env.example .env
-# Sesuaikan DATABASE_URL dan JWT_SECRET di file .env jika kredensial berbeda
 
-# Pasang dependensi
+# Install paket dependensi
 npm install
 
-# Sinkronkan skema Prisma ke database & generate client
+# Sinkronkan model database & generate Prisma client
 npx prisma generate
 npx prisma db push
 
-# Isi data awal (admin, staf, menu contoh)
+# Eksekusi seeder data awal
 npm run seed
 
-# Jalankan server API
+# Jalankan development server
 npm run dev
 ```
-Backend berjalan di port `http://localhost:5000`.
+Backend akan aktif di `http://localhost:5000`.
 
 #### 2. Setup Frontend
-Buka tab terminal baru:
+Buka jendela terminal baru:
 ```bash
 cd frontend
 
-# Buat file environment dari template
+# Salin template environment
 cp .env.example .env
 
-# Pasang dependensi
+# Install dependensi
 npm install
 
-# Jalankan server dev Vite
+# Jalankan Vite server
 npm run dev
 ```
-Frontend berjalan di port `http://localhost:5173`.
+Frontend akan aktif di `http://localhost:5173`.
 
 ---
 
-## Akun Bawaan (Default Data Seed)
+## Akun Demo Pengujian
 
-Data akun awal berikut sudah disiapkan secara otomatis saat menjalankan perintah seed atau saat container pertama kali aktif:
+Data akun berikut telah terisi secara otomatis melalui skrip seeder:
 
-| Peran | Alamat Email | Password | Hak Akses |
+| Peran Akun | Alamat Email | Kata Sandi | Cakupan Hak Akses |
 |---|---|---|---|
-| **Administrator** | `admin@foodordering.com` | `admin123` | Akses penuh dashboard, manajemen user, laporan penjualan |
-| **Staff Kasir** | `staff@foodordering.com` | `staff123` | Dashboard operasional, mutasi stok, input quotation & invoice |
-| **Customer** | *(Dapat mendaftar melalui form Register)* | - | Akses katalog menu & keranjang belanja |
+| **Super Admin** | `admin@foodordering.com` | `admin123` | Akses penuh dashboard, kelola user, master data, laporan finansial |
+| **Staff Kasir** | `staff@foodordering.com` | `staff123` | Akses operasional, stok opname, input quotation, dan invoice |
+| **Pelanggan** | *(Dapat mendaftar via form registrasi)* | - | Akses katalog menu, checkout, dan status pesanan |
 
 ---
 
-## Ringkasan Endpoint API
+## Dokumentasi API
 
-| Method | Endpoint | Akses | Deskripsi |
+Seluruh endpoint terpusat pada prefix `/api`. Header `Authorization: Bearer <token>` wajib disertakan pada endpoint yang terproteksi.
+
+| Metode | Endpoint | Hak Akses | Deskripsi |
 |---|---|---|---|
-| `POST` | `/api/auth/register` | Publik | Registrasi akun baru (Customer/Staff) |
-| `POST` | `/api/auth/login` | Publik | Autentikasi user & pengembalian token JWT |
-| `GET` | `/api/products` | Terautentikasi | Mengambil daftar produk (filter `search` & `categoryId`) |
-| `POST` | `/api/products` | Staff/Admin | Menambah menu baru beserta upload gambar |
-| `PUT` | `/api/products/:id` | Staff/Admin | Memperbarui data produk & stok |
-| `DELETE` | `/api/products/:id` | Staff/Admin | Menghapus menu dari sistem |
-| `GET` | `/api/categories` | Terautentikasi | Mengambil data kategori menu |
-| `GET` | `/api/units` | Terautentikasi | Mengambil data satuan (porsi, cup, pcs, dll.) |
-| `GET` | `/api/stock` | Staff/Admin | Melihat riwayat mutasi persediaan barang |
-| `POST` | `/api/stock` | Staff/Admin | Menambah mutasi stok masuk, keluar, atau penyesuaian |
-| `GET` | `/api/quotations` | Staff/Admin | Daftar dan rincian surat penawaran harga |
-| `GET` | `/api/invoices` | Staff/Admin | Daftar dan pengelolaan status pembayaran faktur |
-| `GET` | `/api/dashboard` | Staff/Admin | Statistik ringkasan penjualan, transaksi, dan notifikasi |
+| `POST` | `/api/auth/register` | Publik | Registrasi akun pengguna baru |
+| `POST` | `/api/auth/login` | Publik | Otentikasi dan penerbitan token JWT |
+| `GET` | `/api/products` | Terautentikasi | Mengambil daftar produk (parameter: `search`, `categoryId`) |
+| `POST` | `/api/products` | Staff / Admin | Membuat produk baru beserta unggah gambar |
+| `PUT` | `/api/products/:id` | Staff / Admin | Memperbarui data produk dan stok |
+| `DELETE`| `/api/products/:id` | Staff / Admin | Menghapus produk |
+| `GET` | `/api/categories` | Terautentikasi | Mengambil seluruh master kategori |
+| `GET` | `/api/units` | Terautentikasi | Mengambil daftar satuan unit produk |
+| `GET` | `/api/stock` | Staff / Admin | Mengambil riwayat mutasi persediaan |
+| `POST` | `/api/stock` | Staff / Admin | Mencatat pergerakan stok (in, out, adjustment) |
+| `GET` | `/api/quotations` | Staff / Admin | Daftar dan manajemen penawaran harga |
+| `POST` | `/api/quotations` | Staff / Admin | Menerbitkan surat penawaran harga baru |
+| `GET` | `/api/invoices` | Staff / Admin | Daftar dan manajemen faktur tagihan |
+| `POST` | `/api/invoices` | Staff / Admin | Membuat faktur tagihan baru |
+| `GET` | `/api/dashboard` | Staff / Admin | Mengambil ringkasan statistik dan metrik penjualan |
 
 ---
 
@@ -190,27 +276,43 @@ Data akun awal berikut sudah disiapkan secara otomatis saat menjalankan perintah
 ```
 Foods-Orderings-Systems/
 ├── backend/
-│   ├── prisma/             # Skema Prisma, migrasi, dan skrip seed awal
+│   ├── prisma/             # Skema Prisma ORM, migrasi, dan seed script
 │   ├── src/
-│   │   ├── controllers/    # Logika bisnis endpoint (auth, product, invoice, dll.)
-│   │   ├── middleware/     # Guard JWT, pengecekan RBAC, Multer upload
-│   │   ├── routes/         # Pemetaan routing REST API
-│   │   └── lib/            # Prisma Client singleton
-│   ├── server.ts           # Entry point server Express
-│   ├── Dockerfile          # Image build backend
-│   └── docker-entrypoint.sh # Skrip auto-sync skema DB & seeder saat startup
+│   │   ├── controllers/    # Handler logika bisnis API (auth, product, invoice, dll.)
+│   │   ├── middleware/     # Otentikasi JWT, validasi role RBAC, upload Multer
+│   │   ├── routes/         # Definisi router Express
+│   │   └── lib/            # Instance client database
+│   ├── server.ts           # Entry point backend server
+│   ├── Dockerfile          # Spesifikasi container backend
+│   └── docker-entrypoint.sh # Otomatisasi migrasi skema dan seed saat boot
 ├── frontend/
 │   ├── src/
-│   │   ├── components/     # Komponen UI bersama (button, dialog, card, layout)
-│   │   ├── context/        # State autentikasi dan penyimpanan token
+│   │   ├── components/     # UI primitives & layout (Radix UI, Tailwind)
+│   │   ├── context/        # Global state autentikasi & JWT decoded session
 │   │   ├── page/
-│   │   │   ├── auth/       # Login, register, halaman pemilihan peran
-│   │   │   ├── customer/   # Tampilan belanja menu & riwayat transaksi
-│   │   │   └── staff/      # Halaman kelola produk, transaksi, dan master data
-│   │   └── lib/            # Konfigurasi instance Axios
-│   ├── nginx.conf          # Pengaturan reverse proxy dan fallback routing SPA
+│   │   │   ├── auth/       # Halaman login, registrasi, pemilihan role
+│   │   │   ├── customer/   # Halaman belanja, keranjang, dan order list
+│   │   │   └── staff/      # Halaman ERP (inventaris, quotation, invoice, user)
+│   │   └── lib/            # Instance Axios terkonfigurasi otomatis
+│   ├── nginx.conf          # Konfigurasi reverse proxy & SPA routing fallback
 │   └── Dockerfile          # Multi-stage container build frontend
-├── docker-compose.yml      # Orkestrasi container PostgreSQL, backend, dan frontend
-├── package.json            # Skrip shortcut terpusat di root
-└── readme.md               # Dokumentasi sistem
+├── docker-compose.yml      # Orkestrator multi-container (DB, Backend, Frontend)
+├── package.json            # Shortcut skrip root proyek
+├── GIT_FLOW.md             # Panduan standarisasi branching Git
+├── Faq.md                  # Tanya jawab teknis pengembangan
+└── readme.md               # Dokumentasi utama proyek
 ```
+
+---
+
+## Standar Alur Kerja
+
+Proyek ini menerapkan standarisasi branching dan kolaborasi berbasis Git Flow:
+- Detail alur pembuatan fitur, staging, dan release dapat dilihat pada [GIT_FLOW.md](./GIT_FLOW.md).
+- Solusi troubleshooting dan panduan branching harian dapat dilihat pada [Faq.md](./Faq.md).
+
+---
+
+## Lisensi
+
+Didistribusikan di bawah lisensi **ISC**. Dikembangkan sebagai proyek portofolio sistem full-stack engineering.
