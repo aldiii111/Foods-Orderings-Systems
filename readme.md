@@ -1,227 +1,216 @@
-# 🍔 Food Ordering System
+# Food Ordering & Operations System
 
-Aplikasi full-stack sistem pemesanan makanan dengan fitur autentikasi, manajemen produk, dan upload gambar.
-
----
-
-## 🏗️ Arsitektur
-
-```
-Foods-Orderings-Systems/
-├── backend/          → REST API (Express.js + Prisma + PostgreSQL)
-├── frontend/         → Web Client (React + TypeScript + Vite + TailwindCSS)
-└── readme.md         → Dokumentasi ini
-```
-
-```
-┌──────────────────┐       HTTP        ┌──────────────────┐       SQL        ┌──────────────────┐
-│                  │   (port 5173)     │                  │   (port 5432)    │                  │
-│     Frontend     │ ───────────────── │     Backend      │ ──────────────── │   PostgreSQL     │
-│   React + Vite   │   Axios / REST    │   Express.js     │     Prisma       │   Database       │
-│                  │                   │   (port 5000)    │                  │                  │
-└──────────────────┘                   └──────────────────┘                  └──────────────────┘
-```
+Sistem manajemen restoran dan pemesanan makanan full-stack yang mengintegrasikan portal pemesanan pelanggan dengan sistem operasional back-office (kasir, inventaris stok, penawaran harga, dan penagihan faktur).
 
 ---
 
-## 📋 Tech Stack
+## Tentang Sistem
 
-### Backend
-| Teknologi | Deskripsi |
-|-----------|-----------|
-| **Express.js v5** | Web framework REST API |
-| **Prisma v6** | ORM untuk PostgreSQL |
-| **PostgreSQL** | Relational database |
-| **JWT** | Autentikasi berbasis token |
-| **bcryptjs** | Password hashing |
-| **Multer** | File upload handling |
+Pada bisnis food & beverage (F&B), pencatatan pesanan sering kali terputus dari manajemen persediaan bahan baku dan administrasi penagihan. Sistem ini dibangun untuk mengatasi kendala tersebut dengan menghubungkan seluruh siklus operasional dalam satu platform: mulai dari etalase menu yang dilihat pelanggan, pelacakan mutasi persediaan di dapur/gudang, hingga penerbitan dokumen komersial (*quotation* dan *invoice*).
 
-### Frontend
-| Teknologi | Deskripsi |
-|-----------|-----------|
-| **React 19** | UI Library |
-| **TypeScript** | Type-safe JavaScript |
-| **Vite v8** | Build tool & dev server |
-| **TailwindCSS v4** | Utility-first CSS |
-| **ShadCN UI** | Component library (radix-nova) |
-| **React Router v7** | Client-side routing |
-| **Axios** | HTTP client |
+Aplikasi memisahkan alur kerja ke dalam dua antarmuka utama:
 
----
+### 1. Portal Pelanggan (Customer Facing)
+- **Katalog Menu Dinamis**: Menampilkan menu makanan dan minuman dengan filter kategori dan pencarian instan.
+- **Keranjang & Checkout**: Kalkulasi item pesanan dan pengiriman order secara real-time.
+- **Riwayat Transaksi**: Pemantauan status pemesanan pelanggan yang terdaftar.
 
-## ✨ Fitur
-
-- 🔐 **Autentikasi** — Register & Login dengan JWT
-- 🛒 **Manajemen Produk** — CRUD produk makanan (nama, deskripsi, harga, stok)
-- 🔍 **Pencarian** — Cari produk berdasarkan nama
-- 📷 **Upload Gambar** — Upload gambar produk via Multer
-- 🎨 **Design System** — UI premium dengan dark mode support
-- 🛡️ **Role-based** — Sistem role User (default) untuk kontrol akses
+### 2. Dashboard Operasional (Staff & Admin)
+- **Manajemen Inventaris & Mutasi Stok**:
+  - Pelacakan stok masuk (*in*), keluar (*out*), dan penyesuaian (*adjustment*).
+  - Peringatan dini ketika persediaan mendekati batas minimum (*low stock alert*).
+  - Kalkulasi margin keuntungan berbasis HPP (*cost price*) dan harga jual (*selling price*).
+- **Billing & Dokumen Finansial**:
+  - Pembuatan dan konversi *Quotation* (penawaran harga) untuk pesanan katering atau partai besar.
+  - Penerbitan *Invoice* dan pencatatan riwayat pelunasan tagihan (*unpaid*, *partial*, *paid*).
+- **Master Data**:
+  - Manajemen kategori menu, satuan unit (porsi, pcs, cup, botol), dan data kontak pelanggan.
+- **Keamanan & Kontrol Akses (RBAC)**:
+  - Pembatasan menu dan aksi berdasarkan hak akses staf (`SUPER_ADMIN`, `ADMIN`, `STAFF`, dan `customer`).
+  - Pencatatan log aktivitas sistem (*audit log*).
 
 ---
 
-## 🚀 Quick Start
+## Arsitektur & Desain Sistem
 
-### Prerequisites
+Aplikasi ini menggunakan arsitektur *decoupled* untuk menjaga modularitas antara antarmuka pengguna dan logika bisnis:
 
-- **Node.js** v18+ → [Download](https://nodejs.org)
-- **PostgreSQL** v15+ → Lihat panduan install di bawah
-- **Git** → [Download](https://git-scm.com)
-
-#### Install PostgreSQL
-
-<details>
-<summary><strong>🍎 macOS</strong></summary>
-
-```bash
-# Via Homebrew
-brew install postgresql@17
-brew services start postgresql@17
+```
+┌─────────────────────────────────┐
+│     Client Browser              │
+└────────────────┬────────────────┘
+                 │ Port 5173 (Host)
+                 ▼
+┌─────────────────────────────────┐
+│   Frontend (Nginx + React 19)   │
+│   - React Router SPA Fallback   │
+│   - Reverse Proxy:              │
+│       /api/    -> Backend       │
+│       /uploads -> Backend       │
+└────────────────┬────────────────┘
+                 │ HTTP (Port 5000 internal)
+                 ▼
+┌─────────────────────────────────┐
+│   Backend (Express v5 + TS)     │
+│   - Autentikasi JWT & Role RBAC │
+│   - Validasi & REST Controller  │
+│   - File Upload (Multer)        │
+└────────────────┬────────────────┘
+                 │ TCP (Port 5432 internal)
+                 ▼
+┌─────────────────────────────────┐
+│   Database (PostgreSQL 16)      │
+│   - Skema Relasional Prisma ORM │
+│   - Volume Data Persisten       │
+└─────────────────────────────────┘
 ```
 
-</details>
+### Stack Teknologi
+- **Frontend**: React 19, TypeScript, Vite, TailwindCSS v4, React Router v7, ShadCN UI / Radix primitives, Axios.
+- **Backend**: Express.js v5, TypeScript, Prisma ORM, JSON Web Token (JWT), bcryptjs, Multer.
+- **Database & Infrastruktur**: PostgreSQL 16, Docker & Docker Compose, Nginx Alpine.
 
-<details>
-<summary><strong>🪟 Windows</strong></summary>
+---
 
-1. Download installer dari [postgresql.org/download/windows](https://www.postgresql.org/download/windows/)
-2. Jalankan installer, ikuti wizard (catat password yang diset untuk user `postgres`)
-3. Pastikan centang **pgAdmin** dan **Command Line Tools**
-4. PostgreSQL akan otomatis berjalan sebagai Windows Service
+## Panduan Menjalankan
 
-Atau via **Chocolatey**:
-```powershell
-choco install postgresql17
-```
+Aplikasi dapat dijalankan secara instan menggunakan Docker (disarankan), atau dijalankan secara manual pada lingkungan lokal.
 
-</details>
+### Opsi 1: Menjalankan Menggunakan Docker (Instan)
 
-<details>
-<summary><strong>🐧 Linux (Ubuntu/Debian)</strong></summary>
+Metode ini otomatis menyiapkan container database PostgreSQL, sinkronisasi skema tabel, pemuatan data awal (*seeding*), serta menjalankan backend dan frontend.
 
-```bash
-sudo apt update
-sudo apt install postgresql postgresql-contrib
-sudo systemctl start postgresql
-sudo systemctl enable postgresql
-```
+1. **Jalankan seluruh service:**
+   ```bash
+   docker compose up --build -d
+   ```
 
-</details>
+2. **Akses URL aplikasi:**
+   - **Frontend**: [http://localhost:5173](http://localhost:5173)
+   - **Backend API**: [http://localhost:5000](http://localhost:5000)
+   - **PostgreSQL**: `localhost:5432` (`user: postgres`, `password: postgres`, `db: food_ordering`)
 
-### 1. Clone Repository
+3. **Perintah manajemen container:**
+   ```bash
+   # Melihat status log service
+   docker compose logs -f
 
-```bash
-git clone https://github.com/aldiii111/Foods-Orderings-Systems.git
-cd Foods-Orderings-Systems
-```
+   # Menghentikan service
+   docker compose down
 
-### 2. Setup Database
+   # Reset total database & volume
+   docker compose down -v
+   ```
 
-**macOS / Linux:**
-```bash
-createdb food_ordering
-```
+---
 
-**Windows (Command Prompt / PowerShell):**
-```powershell
-# Jika PostgreSQL ada di PATH:
-createdb -U postgres food_ordering
+### Opsi 2: Menjalankan Secara Manual (Local Development)
 
-# Atau via psql:
-psql -U postgres -c "CREATE DATABASE food_ordering;"
-```
+Gunakan opsi ini jika ingin mengembangkan fitur tanpa perantara container.
 
-> **💡 Note:** Di Windows, kamu akan diminta memasukkan password `postgres` yang diset saat instalasi.
+**Prasyarat:**
+- Node.js v18 atau versi lebih baru
+- PostgreSQL aktif pada port `5432`
 
-### 3. Setup & Jalankan Backend
-
+#### 1. Setup Backend
 ```bash
 cd backend
 
-# Install dependencies
+# Buat file environment dari template
+cp .env.example .env
+# Sesuaikan DATABASE_URL dan JWT_SECRET di file .env jika kredensial berbeda
+
+# Pasang dependensi
 npm install
 
-# Buat file .env dari template
-cp .env.example .env
-# Edit .env → sesuaikan DATABASE_URL dan JWT_SECRET
-
-# Generate Prisma Client & jalankan migrasi
+# Sinkronkan skema Prisma ke database & generate client
 npx prisma generate
-npx prisma migrate deploy
+npx prisma db push
 
-# Jalankan server
+# Isi data awal (admin, staf, menu contoh)
+npm run seed
+
+# Jalankan server API
 npm run dev
 ```
+Backend berjalan di port `http://localhost:5000`.
 
-✅ Backend berjalan di **http://localhost:5000**
-
-### 4. Setup & Jalankan Frontend
-
+#### 2. Setup Frontend
+Buka tab terminal baru:
 ```bash
 cd frontend
 
-# Install dependencies
-npm install
-
-# Buat file .env dari template
+# Buat file environment dari template
 cp .env.example .env
 
-# Jalankan dev server
+# Pasang dependensi
+npm install
+
+# Jalankan server dev Vite
 npm run dev
 ```
-
-✅ Frontend berjalan di **http://localhost:5173**
-
----
-
-## 📡 API Endpoints
-
-| Method | Endpoint | Auth | Deskripsi |
-|--------|----------|------|-----------|
-| `POST` | `/api/auth/register` | ❌ | Registrasi user baru |
-| `POST` | `/api/auth/login` | ❌ | Login, return JWT token |
-| `GET` | `/api/products` | ✅ | List semua produk |
-| `GET` | `/api/products?search=keyword` | ✅ | Cari produk by nama |
-| `POST` | `/api/products` | ✅ | Buat produk baru |
-| `GET` | `/api/products/:id` | ✅ | Detail produk by ID |
-| `PUT` | `/api/products/:id` | ✅ | Update produk |
-
-> Dokumentasi API lengkap tersedia di [`backend/readme.md`](./backend/readme.md)
+Frontend berjalan di port `http://localhost:5173`.
 
 ---
 
-## 🗄️ Database Schema
+## Akun Bawaan (Default Data Seed)
+
+Data akun awal berikut sudah disiapkan secara otomatis saat menjalankan perintah seed atau saat container pertama kali aktif:
+
+| Peran | Alamat Email | Password | Hak Akses |
+|---|---|---|---|
+| **Administrator** | `admin@foodordering.com` | `admin123` | Akses penuh dashboard, manajemen user, laporan penjualan |
+| **Staff Kasir** | `staff@foodordering.com` | `staff123` | Dashboard operasional, mutasi stok, input quotation & invoice |
+| **Customer** | *(Dapat mendaftar melalui form Register)* | - | Akses katalog menu & keranjang belanja |
+
+---
+
+## Ringkasan Endpoint API
+
+| Method | Endpoint | Akses | Deskripsi |
+|---|---|---|---|
+| `POST` | `/api/auth/register` | Publik | Registrasi akun baru (Customer/Staff) |
+| `POST` | `/api/auth/login` | Publik | Autentikasi user & pengembalian token JWT |
+| `GET` | `/api/products` | Terautentikasi | Mengambil daftar produk (filter `search` & `categoryId`) |
+| `POST` | `/api/products` | Staff/Admin | Menambah menu baru beserta upload gambar |
+| `PUT` | `/api/products/:id` | Staff/Admin | Memperbarui data produk & stok |
+| `DELETE` | `/api/products/:id` | Staff/Admin | Menghapus menu dari sistem |
+| `GET` | `/api/categories` | Terautentikasi | Mengambil data kategori menu |
+| `GET` | `/api/units` | Terautentikasi | Mengambil data satuan (porsi, cup, pcs, dll.) |
+| `GET` | `/api/stock` | Staff/Admin | Melihat riwayat mutasi persediaan barang |
+| `POST` | `/api/stock` | Staff/Admin | Menambah mutasi stok masuk, keluar, atau penyesuaian |
+| `GET` | `/api/quotations` | Staff/Admin | Daftar dan rincian surat penawaran harga |
+| `GET` | `/api/invoices` | Staff/Admin | Daftar dan pengelolaan status pembayaran faktur |
+| `GET` | `/api/dashboard` | Staff/Admin | Statistik ringkasan penjualan, transaksi, dan notifikasi |
+
+---
+
+## Struktur Direktori
 
 ```
-┌─────────────────────────────────┐    ┌─────────────────────────────────┐
-│           Product               │    │             User                │
-├─────────────────────────────────┤    ├─────────────────────────────────┤
-│ id          Int (PK, Auto)      │    │ id        Int (PK, Auto)       │
-│ name        String              │    │ name      String               │
-│ description String?             │    │ email     String (Unique)      │
-│ price       Float               │    │ password  String (Hashed)      │
-│ image       String?             │    │ role      String (default:USER)│
-│ stock       Int (default: 0)    │    │ createdAt DateTime             │
-│ createdAt   DateTime            │    │                                │
-└─────────────────────────────────┘    └─────────────────────────────────┘
+Foods-Orderings-Systems/
+├── backend/
+│   ├── prisma/             # Skema Prisma, migrasi, dan skrip seed awal
+│   ├── src/
+│   │   ├── controllers/    # Logika bisnis endpoint (auth, product, invoice, dll.)
+│   │   ├── middleware/     # Guard JWT, pengecekan RBAC, Multer upload
+│   │   ├── routes/         # Pemetaan routing REST API
+│   │   └── lib/            # Prisma Client singleton
+│   ├── server.ts           # Entry point server Express
+│   ├── Dockerfile          # Image build backend
+│   └── docker-entrypoint.sh # Skrip auto-sync skema DB & seeder saat startup
+├── frontend/
+│   ├── src/
+│   │   ├── components/     # Komponen UI bersama (button, dialog, card, layout)
+│   │   ├── context/        # State autentikasi dan penyimpanan token
+│   │   ├── page/
+│   │   │   ├── auth/       # Login, register, halaman pemilihan peran
+│   │   │   ├── customer/   # Tampilan belanja menu & riwayat transaksi
+│   │   │   └── staff/      # Halaman kelola produk, transaksi, dan master data
+│   │   └── lib/            # Konfigurasi instance Axios
+│   ├── nginx.conf          # Pengaturan reverse proxy dan fallback routing SPA
+│   └── Dockerfile          # Multi-stage container build frontend
+├── docker-compose.yml      # Orkestrasi container PostgreSQL, backend, dan frontend
+├── package.json            # Skrip shortcut terpusat di root
+└── readme.md               # Dokumentasi sistem
 ```
-
----
-
-## 📖 Dokumentasi Detail
-
-| Dokumen | Deskripsi |
-|---------|-----------|
-| [`backend/readme.md`](./backend/readme.md) | Setup backend, API docs, contoh curl |
-| [`frontend/readme.md`](./frontend/readme.md) | Setup frontend, design system, panduan development |
-| [`GIT_FLOW.md`](./GIT_FLOW.md) | Strategi branching & alur kerja Git |
-
----
-
-## 👥 Tim
-
-Dibangun oleh tim **Foods Ordering Systems**.
-
-## 📄 License
-
-ISC

@@ -1,0 +1,16 @@
+{
+  "name": "foods-orderings-systems",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Food Ordering System Fullstack Application",
+  "scripts": {
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build:backend": "cd backend && npm run build",
+    "build:frontend": "cd frontend && npm run build",
+    "seed:backend": "cd backend && npm run seed",
+    "docker:up": "docker compose up --build -d",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f"
+  }
+}
