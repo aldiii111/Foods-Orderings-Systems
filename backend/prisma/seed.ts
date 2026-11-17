@@ -1,4 +1,3 @@
-import process from "process";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
@@ -7,35 +6,56 @@ const prisma = new PrismaClient();
 async function main() {
   console.log("Seeding database...");
 
-  // 1. Seed Users
-  const passwordHash = await bcrypt.hash("admin123", 10);
+  // 1. Seed Users (Hanya role: staff & customer)
   const staffHash = await bcrypt.hash("staff123", 10);
-
-  const admin = await prisma.user.upsert({
-    where: { email: "admin@foodordering.com" },
-    update: {},
-    create: {
-      name: "Administrator",
-      email: "admin@foodordering.com",
-      password: passwordHash,
-      role: "SUPER_ADMIN",
-      status: "ACTIVE",
-    },
-  });
+  const customerHash = await bcrypt.hash("customer123", 10);
 
   const staff = await prisma.user.upsert({
     where: { email: "staff@foodordering.com" },
-    update: {},
+    update: {
+      role: "staff",
+      password: staffHash,
+    },
     create: {
-      name: "Staff Kasir",
+      name: "Staff",
       email: "staff@foodordering.com",
       password: staffHash,
-      role: "STAFF",
+      role: "staff",
       status: "ACTIVE",
     },
   });
 
-  console.log(`Users created: ${admin.email}, ${staff.email}`);
+  const customerUser = await prisma.user.upsert({
+    where: { email: "customer@foodordering.com" },
+    update: {
+      role: "customer",
+      password: customerHash,
+    },
+    create: {
+      name: "Customer Demo",
+      email: "customer@foodordering.com",
+      password: customerHash,
+      role: "customer",
+      status: "ACTIVE",
+    },
+  });
+
+  // Jika admin@foodordering.com pernah dibuat, ubah role-nya ke staff agar bisa login di frontend
+  await prisma.user.upsert({
+    where: { email: "admin@foodordering.com" },
+    update: {
+      role: "staff",
+    },
+    create: {
+      name: "Staff Admin",
+      email: "admin@foodordering.com",
+      password: staffHash,
+      role: "staff",
+      status: "ACTIVE",
+    },
+  });
+
+  console.log(`Users created: ${staff.email} (staff), ${customerUser.email} (customer)`);
 
   // 2. Seed Units
   const unitsData = [
@@ -147,8 +167,8 @@ async function main() {
     },
   });
 
-  console.log(`✅ Sample customer created: ${customer.name}`);
-  console.log("✨ Seeding completed successfully!");
+  console.log(`Sample customer created: ${customer.name}`);
+  console.log("Seeding completed successfully!");
 }
 
 main()

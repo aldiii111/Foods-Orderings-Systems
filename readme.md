@@ -48,14 +48,14 @@ Proyek ini dibangun sebagai solusi terpadu dengan menghubungkan tiga pilar opera
 - **Keranjang Belanja (*Shopping Cart*)**: Kalkulasi kuantitas, harga, dan subtotal dinamis berbasis *local state*.
 - **Checkout & Riwayat Pesanan**: Pengiriman pesanan dan pemantauan riwayat status pemesanan pelanggan.
 
-### 2. Dashboard Operasional (Staff & Admin)
+### 2. Dashboard Operasional (Staff)
 - **Ringkasan Penjualan & Notifikasi**: Pemantauan metrik penjualan, grafik performa, dan peringatan dini stok menipis (*low stock alert*).
 - **Manajemen Mutasi Stok**: Pencatatan riwayat stok masuk (*in*), stok keluar (*out*), dan *adjustment* opname lengkap dengan riwayat user penanggung jawab.
 - **Komersial & Penagihan (Quotation & Invoice)**:
   - Pembuatan dokumen penawaran harga (*quotations*) dengan diskon dan pajak.
   - Pembuatan faktur (*invoices*) dengan status pembayaran (*unpaid*, *partial*, *paid*).
 - **Master Data**: Pengelolaan data produk (harga modal, harga jual, barcode, SKU), satuan unit (*pcs*, *porsi*, *cup*), kategori, dan direktori pelanggan.
-- **Role-Based Access Control (RBAC)**: Proteksi rute navigasi dan endpoint berdasarkan hak akses user (`SUPER_ADMIN`, `ADMIN`, `STAFF`, `customer`).
+- **Role-Based Access Control (RBAC)**: Proteksi rute navigasi dan endpoint berdasarkan hak akses user (`staff` dan `customer`).
 
 ---
 
@@ -241,9 +241,8 @@ Data akun berikut telah terisi secara otomatis melalui skrip seeder:
 
 | Peran Akun | Alamat Email | Kata Sandi | Cakupan Hak Akses |
 |---|---|---|---|
-| **Super Admin** | `admin@foodordering.com` | `admin123` | Akses penuh dashboard, kelola user, master data, laporan finansial |
-| **Staff Kasir** | `staff@foodordering.com` | `staff123` | Akses operasional, stok opname, input quotation, dan invoice |
-| **Pelanggan** | *(Dapat mendaftar via form registrasi)* | - | Akses katalog menu, checkout, dan status pesanan |
+| **Staff** | `staff@foodordering.com` | `staff123` | Akses operasional, stok opname, input quotation, invoice, dan master data |
+| **Customer** | `customer@foodordering.com` | `customer123` | Akses katalog menu, checkout, dan status pesanan |
 
 ---
 
@@ -256,18 +255,18 @@ Seluruh endpoint terpusat pada prefix `/api`. Header `Authorization: Bearer <tok
 | `POST` | `/api/auth/register` | Publik | Registrasi akun pengguna baru |
 | `POST` | `/api/auth/login` | Publik | Otentikasi dan penerbitan token JWT |
 | `GET` | `/api/products` | Terautentikasi | Mengambil daftar produk (parameter: `search`, `categoryId`) |
-| `POST` | `/api/products` | Staff / Admin | Membuat produk baru beserta unggah gambar |
-| `PUT` | `/api/products/:id` | Staff / Admin | Memperbarui data produk dan stok |
-| `DELETE`| `/api/products/:id` | Staff / Admin | Menghapus produk |
+| `POST` | `/api/products` | Staff | Membuat produk baru beserta unggah gambar |
+| `PUT` | `/api/products/:id` | Staff | Memperbarui data produk dan stok |
+| `DELETE`| `/api/products/:id` | Staff | Menghapus produk |
 | `GET` | `/api/categories` | Terautentikasi | Mengambil seluruh master kategori |
 | `GET` | `/api/units` | Terautentikasi | Mengambil daftar satuan unit produk |
-| `GET` | `/api/stock` | Staff / Admin | Mengambil riwayat mutasi persediaan |
-| `POST` | `/api/stock` | Staff / Admin | Mencatat pergerakan stok (in, out, adjustment) |
-| `GET` | `/api/quotations` | Staff / Admin | Daftar dan manajemen penawaran harga |
-| `POST` | `/api/quotations` | Staff / Admin | Menerbitkan surat penawaran harga baru |
-| `GET` | `/api/invoices` | Staff / Admin | Daftar dan manajemen faktur tagihan |
-| `POST` | `/api/invoices` | Staff / Admin | Membuat faktur tagihan baru |
-| `GET` | `/api/dashboard` | Staff / Admin | Mengambil ringkasan statistik dan metrik penjualan |
+| `GET` | `/api/stock` | Staff | Mengambil riwayat mutasi persediaan |
+| `POST` | `/api/stock` | Staff | Mencatat pergerakan stok (in, out, adjustment) |
+| `GET` | `/api/quotations` | Staff | Daftar dan manajemen penawaran harga |
+| `POST` | `/api/quotations` | Staff | Menerbitkan surat penawaran harga baru |
+| `GET` | `/api/invoices` | Staff | Daftar dan manajemen faktur tagihan |
+| `POST` | `/api/invoices` | Staff | Membuat faktur tagihan baru |
+| `GET` | `/api/dashboard` | Staff | Mengambil ringkasan statistik dan metrik penjualan |
 
 ---
 

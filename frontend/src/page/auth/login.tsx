@@ -18,10 +18,9 @@ export function Login() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      const normalizedRole = role?.toLowerCase();
-      if (normalizedRole === "customer") {
+      if (role === "customer") {
         navigate("/customer");
-      } else if (normalizedRole === "staff" || normalizedRole === "admin" || normalizedRole === "super_admin") {
+      } else if (role === "staff") {
         navigate("/staff");
       }
     }
@@ -40,10 +39,10 @@ export function Login() {
     try {
       const response = await authService.login({ email, password });
       login(response.token);
-      const userRole = response.user.role?.toLowerCase();
+      const userRole = response.user.role;
       if (userRole === "customer") {
         navigate("/customer");
-      } else if (userRole === "staff" || userRole === "admin" || userRole === "super_admin") {
+      } else if (userRole === "staff") {
         navigate("/staff");
       } else {
         navigate("/");

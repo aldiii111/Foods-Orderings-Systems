@@ -6,7 +6,7 @@ export function ProtectedRoute({
   allowedRoles,
 }: {
   children: React.ReactNode;
-  allowedRoles: ("customer" | "staff" | "admin")[];
+  allowedRoles: ("customer" | "staff")[];
 }) {
   const { isAuthenticated, role } = useAuth();
 
@@ -14,15 +14,7 @@ export function ProtectedRoute({
     return <Navigate to="/login" />;
   }
 
-  const normalizedRole = role?.toLowerCase();
-  const isAllowed = allowedRoles.some((r) => {
-    const roleLower = r.toLowerCase();
-    if (roleLower === normalizedRole) return true;
-    if (roleLower === "staff" && (normalizedRole === "admin" || normalizedRole === "super_admin")) return true;
-    return false;
-  });
-
-  if (!isAllowed) {
+  if (!allowedRoles.includes(role as "customer" | "staff")) {
     return <Navigate to="/choose-role" />;
   }
 
