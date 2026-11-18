@@ -19,7 +19,6 @@ Sistem full-stack manajemen pemesanan makanan dan operasional bisnis F&B (*Food 
 - [Fitur Utama](#fitur-utama)
 - [Sorotan Teknis (Engineering Highlights)](#sorotan-teknis-engineering-highlights)
 - [Arsitektur Sistem](#arsitektur-sistem)
-- [Skema Basis Data](#skema-basis-data)
 - [Panduan Menjalankan](#panduan-menjalankan)
   - [Opsi 1: Docker Compose (Disarankan)](#opsi-1-docker-compose-disarankan)
   - [Opsi 2: Manual (Local Development)](#opsi-2-manual-local-development)
