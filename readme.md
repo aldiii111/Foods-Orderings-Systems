@@ -108,51 +108,6 @@ Alur interaksi komponen dalam ekosistem aplikasi:
 
 ---
 
-## Skema Basis Data
-
-Struktur relasi data utama yang dimodelkan pada Prisma ORM:
-
-```
-┌──────────────┐          ┌──────────────┐          ┌──────────────┐
-│   Category   │ 1      * │   Product    │ *      1 │     Unit     │
-│──────────────│──────────│──────────────│──────────│──────────────│
-│ id (PK)      │          │ id (PK)      │          │ id (PK)      │
-│ name         │          │ name         │          │ name         │
-│ order        │          │ sku, barcode │          │ symbol       │
-└──────────────┘          │ costPrice    │          └──────────────┘
-                          │ sellingPrice │
-                          │ stock        │
-                          └──────┬───────┘
-                                 │ 1
-                                 │ *
-                          ┌──────┴───────┐          ┌──────────────┐
-                          │StockMovement │ *      1 │     User     │
-                          │──────────────│──────────│──────────────│
-                          │ id (PK)      │          │ id (PK)      │
-                          │ type         │          │ name, email  │
-                          │ quantity     │          │ password     │
-                          │ before/after │          │ role, status │
-                          └──────────────┘          └──────┬───────┘
-                                                           │ 1
-                                                           │ *
-┌──────────────┐ 1      * ┌──────────────┐          ┌──────┴───────┐
-│   Customer   │──────────│  Quotation   │          │   AuditLog   │
-│──────────────│          │──────────────│          │──────────────│
-│ id (PK)      │          │ id (PK)      │          │ id (PK)      │
-│ name, email  │          │ number (UQ)  │          │ action       │
-│ phone        │          │ totalAmount  │          │ timestamp    │
-│ address      │ 1      * │ productsJson │          └──────────────┘
-│──────────────│──────────│──────────────│
-│ totalOrders  │          │   Invoice    │
-└──────────────┘          │──────────────│
-                          │ id (PK)      │
-                          │ number (UQ)  │
-                          │ paymentStatus│
-                          └──────────────┘
-```
-
----
-
 ## Panduan Menjalankan
 
 ### Opsi 1: Docker Compose (Disarankan)
