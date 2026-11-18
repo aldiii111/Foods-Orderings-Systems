@@ -12,6 +12,8 @@
 
 Sistem full-stack manajemen pemesanan makanan dan operasional bisnis F&B (*Food & Beverage*). Aplikasi ini mengintegrasikan portal pemesanan mandiri untuk pelanggan (*customer-facing*) dengan dashboard ERP mini untuk staf dan manajemen (pengendalian stok, penerbitan surat penawaran, serta penagihan faktur).
 
+STILL UNDER DEVELOPMENT
+
 ---
 
 ## Daftar Isi
