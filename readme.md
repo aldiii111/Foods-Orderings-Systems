@@ -26,7 +26,7 @@ Sistem full-stack manajemen pemesanan makanan dan operasional bisnis F&B (*Food 
 - [Akun Demo Pengujian](#akun-demo-pengujian)
 - [Dokumentasi API](#dokumentasi-api)
 - [Struktur Direktori](#struktur-direktori)
-- [Standar Alur Kerja](#standar-alur-kerja)
+- [Git Workflow & Standar Kolaborasi](#git-workflow--standar-kolaborasi)
 
 ---
 
@@ -304,11 +304,71 @@ Foods-Orderings-Systems/
 
 ---
 
-## Standar Alur Kerja
+## Git Workflow & Standar Kolaborasi
 
-Proyek ini menerapkan standarisasi branching dan kolaborasi berbasis Git Flow:
-- Detail alur pembuatan fitur, staging, dan release dapat dilihat pada [GIT_FLOW.md](./GIT_FLOW.md).
-- Solusi troubleshooting dan panduan branching harian dapat dilihat pada [Faq.md](./Faq.md).
+Proyek ini menerapkan metodologi **Git Flow yang terstruktur (3-Tier Branching Strategy)** untuk menjamin stabilitas kode, mempermudah pelacakan riwayat perubahan (*traceability*), dan mencerminkan praktik standar kolaborasi tim rekayasa perangkat lunak (*software engineering*):
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                        3-TIER GIT FLOW ARCHITECTURE                    │
+├────────────────────────────────────────────────────────────────────────┤
+│                                                                        │
+│   main ────────●─────────────────────────●──────────────────── (Prod)  │
+│                │                         ↑                             │
+│                │ Pull Request (Release)  │                             │
+│                ▼                         │                             │
+│   staging ─────●─────●─────────●─────────●──────●───────────── (Test)  │
+│                      │         ↑                ↑                      │
+│        git checkout  │         │ Pull Request   │ Pull Request         │
+│                      ▼         │ (Feature Done) │ (Bugfix Done)        │
+│   feat/auth ─────────●─────────┘                │                      │
+│   feat/invoice ────────────────●────────────────┘                      │
+│   fix/cors ───────────────────────────────────────────────────         │
+│                                                                        │
+└────────────────────────────────────────────────────────────────────────┘
+```
+
+### 1. Hierarki Branching
+
+| Tingkatan Branch | Nama / Pola | Fungsi & Cakupan Tanggung Jawab |
+|---|---|---|
+| **Production Tier** | `main` | Menyimpan kode versi produksi (*production-ready*) yang sudah stabil, bebas bug kritis, dan siap di-*deploy* ke pengguna akhir. Tidak diperbolehkan adanya direct commit. |
+| **Integration Tier** | `staging` | Pusat pengumpulan seluruh fitur baru dan perbaikan (*single source of truth for QA*). Menjadi tempat pengujian integrasi antara backend dan frontend sebelum dirilis ke `main`. |
+| **Feature / Task Tier** | `feat/<fitur>`<br>`fix/<isu>`<br>`<area>-dev` | Branch kerja dengan cakupan spesifik dan terisolasi. Developer mengerjakan satu unit tugas tanpa mengganggu kode di branch utama maupun rekan tim lainnya. |
+
+---
+
+### 2. Siklus Kerja Fitur (Feature Lifecycle)
+
+1. **Inisialisasi Tugas**: Setiap fitur baru selalu dicabangkan dari titik stabil terbaru di branch `staging`:
+   ```bash
+   git checkout staging && git pull origin staging
+   git checkout -b feat/nama-fitur
+   ```
+2. **Atomic & Monorepo Commits**: Karena proyek ini mencakup backend dan frontend, perubahan yang saling berhubungan (misalnya penambahan endpoint di backend dan implementasi Axios di frontend) di-commit secara terkoordinasi dari root folder agar riwayat perubahan tetap utuh (*atomic*).
+3. **Penyelarasan Sebelum Integrasi**: Sebelum mengajukan penggabungan kode, branch kerja wajib melakukan sinkronisasi terbaru dari `staging` guna mendeteksi dan menyelesaikan konflik (*merge conflict resolution*) di tingkat lokal:
+   ```bash
+   git pull origin staging
+   ```
+4. **Pull Request & Code Review**: Penggabungan kode ke `staging` maupun `main` dilakukan melalui Pull Request (PR) terdokumentasi (seperti riwayat PR #44, #45, #46, #47 pada repositori ini) untuk memastikan kepatuhan standar kode (*code review*).
+
+---
+
+### 3. Konvensi Pesan Commit (Conventional Commits)
+
+Untuk menjaga histori Git tetap bersih, informatif, dan mudah dibaca oleh tim maupun alat otomatisasi CI/CD, pesan commit mengikuti standarisasi:
+
+| Tipe Commit | Tujuan Penggunaan | Contoh Format |
+|---|---|---|
+| `feat:` | Penambahan fitur baru ke sistem | `feat(auth): implement jwt login and role guard` |
+| `fix:` | Perbaikan bug atau kendala teknis | `fix(api): resolve cors header and db pooler port` |
+| `refactor:` | Perubahan struktur kode tanpa mengubah fungsi bisnis | `refactor(auth): simplify role validation logic` |
+| `docs:` | Penambahan atau pembaruan dokumentasi | `docs: add comprehensive git flow architecture` |
+| `chore:` | Pemeliharaan dependensi atau konfigurasi tooling | `chore(deps): update prisma engine to v5.22` |
+
+> 📖 **Panduan Lengkap & FAQ Tim**:
+> - Alur kerja detail step-by-step dan panduan setup terminal kolaborasi tersedia di [GIT_FLOW.md](./GIT_FLOW.md).
+> - Tanya jawab teknis mengenai strategi branching dan penanganan branch remote dapat dilihat di [Faq.md](./Faq.md).
 
 ---
 
