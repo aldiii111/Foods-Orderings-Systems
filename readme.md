@@ -8,36 +8,38 @@
 ![Prisma](https://img.shields.io/badge/Prisma_ORM-2D3748?style=for-the-badge&logo=prisma&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 
-Project web full-stack untuk sistem pemesanan makanan dan manajemen operasional restoran sederhana. Project ini dibuat sebagai sarana pembelajaran dan eksplorasi dalam merancang aplikasi web modern yang menghubungkan sisi pelanggan (*customer*) dan sisi staf/internal (*back-office*).
+A full-stack web project for a food ordering system and simple restaurant operational management. This project was built for learning and exploring how to design modern web applications connecting customer-facing features with staff/internal back-office operations.
+
+> ⚠️ **Note:** This project is still under active development and improvement.
 
 ---
 
-## Tentang Project
+## About the Project
 
-Sistem ini membagi fungsi aplikasi menjadi dua bagian utama:
+The system divides application features into two main areas:
 
-1. **Halaman Pelanggan (Customer)**:
-   - Melihat katalog makanan dan minuman dengan filter kategori.
-   - Mengelola keranjang belanja dan melakukan proses checkout pesanan.
-   - Melihat riwayat pesanan yang sudah dibuat.
+1. **Customer Facing**:
+   - Browse food and beverage catalogs with category filters.
+   - Manage the shopping cart and proceed through order checkout.
+   - View order history.
 
-2. **Dashboard Staf (Staff)**:
-   - **Katalog Menu**: Menambah, mengubah harga, stok, dan foto menu makanan.
-   - **Manajemen Stok**: Mencatat mutasi stok (masuk, keluar, penyesuaian) serta notifikasi stok minimum.
-   - **Quotation & Invoice**: Membuat surat penawaran harga dan tagihan pesanan (status belum bayar, sebagian, lunas).
-   - **Master Data**: Mengatur kategori menu dan satuan produk (porsi, pcs, cup, dll.).
+2. **Staff Dashboard**:
+   - **Menu Catalog**: Add and update menu prices, stock levels, and food photos.
+   - **Stock Management**: Track inventory movements (inbound, outbound, adjustments) with low-stock alerts.
+   - **Quotations & Invoices**: Generate price quotations and order invoices (unpaid, partially paid, paid).
+   - **Master Data**: Manage menu categories and product units (portion, pcs, cup, etc.).
 
 ---
 
-## Latar Belakang & Tujuan Pembelajaran
+## Background & Learning Objectives
 
-Project ini dibuat untuk mempelajari beberapa konsep penting dalam pengembangan web full-stack:
+This project was built to practice key full-stack web development concepts:
 
-- **Relasi Data yang Saling Terhubung**: Mempelajari bagaimana menghubungkan data transaksi pesanan dengan pemotongan stok otomatis dan perhitungan HPP (*cost price* vs *selling price*) menggunakan PostgreSQL dan Prisma ORM.
-- **Pemisahan Frontend dan Backend (Decoupled Architecture)**: Melatih pembuatan REST API mandiri menggunakan Express.js TypeScript yang dikonsumsi oleh aplikasi React (Vite).
-- **Type Safety**: Memanfaatkan TypeScript di sisi client dan server untuk meminimalkan bug data saat pengembangan.
-- **Kontainerisasi dengan Docker**: Mempelajari cara membungkus frontend, backend, dan database ke dalam Docker Compose agar aplikasi mudah dijalankan di komputer mana pun tanpa instalasi manual yang rumit.
-- **Praktik Git Flow**: Menerapkan alur branching yang rapi (`feat/*` → `staging` → `main`) untuk membiasakan standar kolaborasi tim perangkat lunak.
+- **Relational Data Integrity**: Connecting order transactions with automatic stock deductions and cost-of-goods calculation (*cost price* vs *selling price*) using PostgreSQL and Prisma ORM.
+- **Decoupled Architecture**: Building a standalone REST API with Express.js TypeScript consumed by a React (Vite) client.
+- **Type Safety**: Leveraging TypeScript across both client and server to minimize data-related bugs during development.
+- **Containerization with Docker**: Packaging the frontend, backend, and database into Docker Compose so the app can easily run on any machine without complex manual setup.
+- **Git Flow Practices**: Following a structured branching workflow (`feat/*` → `staging` → `main`) to simulate standard software engineering team collaboration.
 
 ---
 
@@ -45,99 +47,99 @@ Project ini dibuat untuk mempelajari beberapa konsep penting dalam pengembangan 
 
 - **Frontend**: React 19, TypeScript, Vite, TailwindCSS v4, React Router v7, ShadCN UI / Radix primitives, Axios.
 - **Backend**: Node.js, Express.js v5, TypeScript, Prisma ORM, JWT, bcryptjs, Multer.
-- **Database**: PostgreSQL 16 (kompatibel dengan Supabase / Neon / PostgreSQL lokal).
+- **Database**: PostgreSQL 16 (compatible with Supabase / Neon / local PostgreSQL).
 - **DevOps**: Docker, Docker Compose, Nginx.
 
 ---
 
-## Cara Menjalankan
+## How to Run
 
-Aplikasi dapat dijalankan dengan dua cara: menggunakan Docker (direkomendasikan) atau manual di komputer lokal.
+The application can be run in two ways: using Docker (recommended) or manually on your local machine.
 
-### Opsi 1: Menggunakan Docker Compose (Instan)
+### Option 1: Using Docker Compose (Instant)
 
-Pastikan Docker sudah terpasang dan aktif di komputer Anda.
+Make sure Docker is installed and running on your machine.
 
-1. **Jalankan container**:
+1. **Start the containers**:
    ```bash
    docker compose up --build -d
    ```
-2. **Buka di browser**:
+2. **Open in your browser**:
    - Frontend: [http://localhost:5173](http://localhost:5173)
    - Backend API: [http://localhost:5000](http://localhost:5000)
-   - Database PostgreSQL lokal: `localhost:5432`
+   - Local PostgreSQL: `localhost:5432`
 
-3. **Perintah tambahan**:
+3. **Additional commands**:
    ```bash
-   # Melihat log aktivitas
+   # View logs
    docker compose logs -f
 
-   # Menghentikan container
+   # Stop containers
    docker compose down
    ```
 
 ---
 
-### Opsi 2: Menjalankan Manual (Local Development)
+### Option 2: Running Manually (Local Development)
 
-**Prasyarat**: Node.js (v18+) dan PostgreSQL lokal yang sedang berjalan.
+**Prerequisites**: Node.js (v18+) and a running local PostgreSQL instance.
 
 1. **Setup Backend**:
    ```bash
    cd backend
    cp .env.example .env
-   # Sesuaikan DATABASE_URL di file .env jika perlu
+   # Adjust DATABASE_URL in the .env file if necessary
 
    npm install
    npx prisma db push
    npm run seed
    npm run dev
    ```
-   Backend berjalan di `http://localhost:5000`.
+   Backend runs at `http://localhost:5000`.
 
 2. **Setup Frontend**:
-   Buka terminal baru:
+   Open a new terminal tab:
    ```bash
    cd frontend
    cp .env.example .env
    npm install
    npm run dev
    ```
-   Frontend berjalan di `http://localhost:5173`.
+   Frontend runs at `http://localhost:5173`.
 
 ---
 
-## Akun untuk Pengujian
+## Test Accounts
 
-Database sudah dilengkapi data awal (*seeder*) untuk mempermudah uji coba fitur:
+The database comes pre-seeded with initial data to easily test features:
 
-| Peran | Email | Password | Keterangan |
+| Role | Email | Password | Details |
 |---|---|---|---|
-| **Staff** | `staff@foodordering.com` | `staff123` | Masuk ke dashboard staf untuk kelola produk, stok, quotation, dan invoice |
-| **Customer** | `customer@foodordering.com` | `customer123` | Masuk ke katalog menu dan keranjang pemesanan |
+| **Staff** | `staff@foodordering.com` | `staff123` | Access the staff dashboard to manage products, stock, quotations, and invoices |
+| **Customer** | `customer@foodordering.com` | `customer123` | Access the menu catalog and shopping cart |
 
-*(Pengguna baru juga dapat mendaftar langsung melalui menu Register di halaman awal).*
+*(New users can also register directly via the Register page).*
 
 ---
 
-## Alur Kerja Git (Git Workflow)
+## Git Workflow
 
-Untuk menjaga histori perubahan tetap rapi dan melatih alur kerja tim, proyek ini menggunakan strategi branching sederhana:
+To maintain a clean commit history and practice team workflows, this project uses a simple branching strategy:
 
 ```
 main (Production)
   ↑
 staging (Integration & Testing)
   ↑
-feat/nama-fitur (Fitur Baru)
+feat/feature-name (New Features)
 ```
 
-- **`feat/*`**: Setiap fitur dikerjakan di branch terpisah yang dibuat dari `staging`.
-- **`staging`**: Tempat penggabungan fitur-fitur baru untuk diuji coba sebelum dirilis. Penggabungan dilakukan melalui Pull Request (PR).
-- **`main`**: Branch utama yang berisi versi aplikasi yang sudah stabil dan siap digunakan.
+- **`feat/*`**: Each feature is developed on a separate branch branched off `staging`.
+- **`staging`**: Integration branch where new features are merged and tested before release via Pull Request (PR).
+- **`main`**: The primary stable branch ready for production use.
 
 ---
 
-## Lisensi
+## License
 
-Proyek ini dibuat untuk tujuan pembelajaran dan eksplorasi pribadi di bawah lisensi **ISC**.
+This project was built for personal learning and exploration purposes under the **ISC** license.
